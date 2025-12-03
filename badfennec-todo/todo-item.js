@@ -23,6 +23,7 @@ export default class TodoItem {
         this.entry = document.createElement('div');
         this.entry.className = 'badfennec-todo__item';
         this.completed = item.completed || false;
+        this.text = item.text || '';
 
         this.#addItemGrabber();        
 
@@ -68,7 +69,7 @@ export default class TodoItem {
     #addItemText(){
         const div = document.createElement('div');
         this.entry.appendChild(div);
-        const entryText = document.createTextNode(this.item.text);
+        const entryText = document.createTextNode(this.text);
         div.appendChild(entryText);
     }
 

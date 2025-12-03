@@ -1,37 +1,38 @@
 export default class Sorting {
 
-    constructor({ ToDo, finalY }) {
+    //indicates if a sort operation  took place
+    hasSorted = false;
 
+    constructor({ ToDo }) {
         this.ToDo = ToDo;
         this.item = this.ToDo.draggingItem;
-        this.#watchDrag( finalY );
-        
-
     }
 
-    #watchDrag( finalY ) {
+    afterDrag( finalY ) {
+        //calculate the difference between the finalY and the item's startY
         const diff = Math.abs( finalY - this.item.startY );
 
+        //if the diffeence is maior tha
         if( diff > 0 && this.ToDo.placeholder && this.ToDo.placeholder.parentNode && this.ToDo.placeholder.getBoundingClientRect().top !== this.item.startY ) {
 
+            //replace placeholder with the dragged item
+            this.#raplacePlaceholder();
             this.#startResort();
-
+            
             return;
         }
 
-        console.log('No sorting needed');
+        this.hasSorted = false;
     }
 
     #startResort(){
-        
-        //replace placeholder with the dragged item
-        this.#raplacePlaceholder();
-
         //reset offsets for all items
         this.#resetOffsets();
 
         //sort items array based on startY positions
         this.#sortItems();
+
+        this.hasSorted = true;
     }
 
     #raplacePlaceholder(){
@@ -49,5 +50,4 @@ export default class Sorting {
             return a.startY - b.startY;
         } );
     }
-
 }

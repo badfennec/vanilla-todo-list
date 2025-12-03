@@ -105,11 +105,15 @@ export default class BadFennecTodo {
     }
 
     #onDragEnd( finalY ) {
-        new Sorting({ ToDo: this, finalY });
+        const sorting = new Sorting({ ToDo: this });
+        sorting.afterDrag( finalY );
         this.draggingItem = null;
         this.dragY = 0;
         this.delta = 0;
         this.#resetPlaceholder();
+
+        if( sorting.hasSorted )
+            this.#updateCallback();
     }
 
     #addPlaceholder({ element, insertMode = 'before' }){
@@ -186,8 +190,6 @@ export default class BadFennecTodo {
 
     #onIntersection( intersectedItem ){
 
-        //this.#resetPlaceholder();
-
         if( this.delta < 0 ) {
             this.#addPlaceholder({ element: intersectedItem.entry, insertMode: 'before' });
         } else {
@@ -200,22 +202,20 @@ export default class BadFennecTodo {
         
     }
 
-    #update() {
+    #updateCallback(){
 
-        //reorder this.items based on current DOM order
-        const newItemsOrder = [];
-        const itemElements = this.el.querySelectorAll('.badfennec-todo__item'); 
-        itemElements.forEach( itemEl => {
-            const item = this.items.find( i => i.entry === itemEl );
-            if( item ) {
-                newItemsOrder.push(item);
-            }
-        });
+        if( !this.updateCallback )
+            return;
 
-        this.items = [...newItemsOrder];
+        const items = [];
 
-        if( this.updateCallback ) {
-            this.updateCallback({ items: this.items });
-        }
+        this.items.forEach( item => {
+            items.push({
+                completed: item.completed,
+                text: item.text
+            });
+        } );
+
+        this.updateCallback({ items });
     }
 }
