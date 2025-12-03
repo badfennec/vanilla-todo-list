@@ -146,6 +146,10 @@ export default class BadFennecTodo {
 
     #addPlaceholder({ element, insertMode = 'before' }){
 
+        if( element.parentNode !== this.notCompletedContainer ){
+            return;
+        }
+
         if( this.placeholder ) {
             this.#resetPlaceholder();
         }
