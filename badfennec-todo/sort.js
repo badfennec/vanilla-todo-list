@@ -9,14 +9,11 @@ export default class Sorting {
     }
 
     afterDrag( finalY ) {
-        //calculate the difference between the finalY and the item's startY
-        const diff = Math.abs( finalY - this.item.startY );
-
-        //if the diffeence is maior tha
-        if( diff > 0 && this.ToDo.placeholder && this.ToDo.placeholder.parentNode && this.ToDo.placeholder.getBoundingClientRect().top !== this.item.startY ) {
+        //if there is a placeholder and its position has changed
+        if( this.ToDo.placeholder && this.ToDo.placeholder.parentNode && this.ToDo.placeholder.getBoundingClientRect().top !== this.item.startY ) {
 
             //replace placeholder with the dragged item
-            this.#raplacePlaceholder();
+            this.#replacePlaceholder();
             this.#startResort();
             
             return;
@@ -35,7 +32,7 @@ export default class Sorting {
         this.hasSorted = true;
     }
 
-    #raplacePlaceholder(){
+    #replacePlaceholder(){
         this.ToDo.placeholder.replaceWith(this.item.entry);
     }
 

@@ -22,7 +22,10 @@ export default class BadFennecTodo {
     placeholder = null;
 
     reactive = null;
-    reactiveSubscriber = null;    
+    reactiveSubscriber = null;
+
+    container = null;
+    completedContainer = null;
 
     constructor({ el, items = [] }) {
         
@@ -45,6 +48,8 @@ export default class BadFennecTodo {
 
         this.el.classList.add('badfennec-todo');
 
+        this.#addContainers();
+
         items.forEach(item => {
             //item = ;
             this.items.push(this.#addItem(item));
@@ -61,6 +66,8 @@ export default class BadFennecTodo {
 
         const subscibeCallback = ( value ) => {
             this.#onDeltaChange( value.dragY );
+
+            this.#completedHandler();
 		}
 
         this.reactive.subscribe( subscibeCallback );
@@ -79,12 +86,32 @@ export default class BadFennecTodo {
             },
             onDragEnd: ( finalY ) => {
                 this.#onDragEnd( finalY );
+            },
+            onComplete: ( item ) => {
+                this.#completeCallback( item );
             }
         });
 
         this.count++;
 
         return item;
+    }
+
+    #addContainers(){
+        this.#addNotCompletedContainer();
+        this.#addCompletedContainer();
+    }
+
+    #addNotCompletedContainer(){
+        this.notCompletedContainer = document.createElement('div');
+        this.notCompletedContainer.className = 'badfennec-todo__not-completed-container';
+        this.el.appendChild( this.notCompletedContainer );
+    }
+
+    #addCompletedContainer(){
+        this.completedContainer = document.createElement('div');
+        this.completedContainer.className = 'badfennec-todo__completed-container';
+        this.el.appendChild( this.completedContainer );
     }
 
     on( event, callback ) {
@@ -101,7 +128,7 @@ export default class BadFennecTodo {
     #onDragMove( deltaY ){
         this.reactive.next({
             dragY: deltaY,
-            items: this.items
+            //items: this.items
         });
     }
 
@@ -131,9 +158,9 @@ export default class BadFennecTodo {
         this.placeholder.style.height = `${this.draggingItem.entry.offsetHeight}px`;
 
         if( insertMode === 'before' ){
-            this.el.insertBefore( this.placeholder, element );
+            this.notCompletedContainer.insertBefore( this.placeholder, element );
         } else {
-            this.el.insertBefore( this.placeholder, element.nextSibling );
+            this.notCompletedContainer.insertBefore( this.placeholder, element.nextSibling );
         }
     }
 
@@ -154,6 +181,10 @@ export default class BadFennecTodo {
     }
 
     #checkIntersections(){
+
+        if( !this.draggingItem ) {
+            return;
+        }
 
         //current dragged item
         const { entry } = this.draggingItem;
@@ -203,6 +234,15 @@ export default class BadFennecTodo {
         
     }
 
+    #completeCallback( item ){
+        
+        this.reactive.next({
+            items: this.items
+        });
+        
+        this.#updateCallback();
+    }
+
     #updateCallback(){
 
         if( !this.updateCallback )
@@ -218,5 +258,48 @@ export default class BadFennecTodo {
         } );
 
         this.updateCallback({ items });
+    }
+
+    #completedHandler(){
+
+        let completedCount = 0;
+
+        this.items.forEach( ( item, currentIndex ) => {
+
+            if( item.completed ) {               
+
+                //item is completed and not in completed container
+                if( item.entry.parentNode !== this.completedContainer ) {
+                    item.entry.remove();
+                    this.completedContainer.appendChild( item.entry );
+                }
+            } else {
+                if( item.entry.parentNode === this.completedContainer ) {
+                    item.entry.remove();
+
+                    const nextItem = this.items.find( ( nextItem, i ) => {
+                        return i > currentIndex && !nextItem.completed && nextItem.entry.parentNode !== this.completedContainer;
+                    });
+
+                    if(!nextItem){
+                        //No items found after current item that are not completed
+                        this.notCompletedContainer.appendChild( item.entry );
+                    } else {
+                        //Insert before the next not completed item found
+                        this.notCompletedContainer.insertBefore( item.entry, nextItem.entry );
+                    }
+                }
+            }            
+
+            item.setStartY();
+            completedCount++;
+        });
+
+        if( completedCount > 0 ) {
+            this.el.insertBefore( this.completedContainer, this.notCompletedContainer.nextSibling );
+        } else {
+            this.completedContainer.remove();
+        }
+
     }
 }

@@ -17,6 +17,7 @@ export default class DragEvents {
 
         new DragPhysics({
             grabber: grabber,
+            item: this.item,
             element: entry,
             container: this.ToDo.el,
             

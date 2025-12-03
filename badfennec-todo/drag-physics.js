@@ -5,9 +5,10 @@ export default class DragPhysics {
     // Initial difference between mouse Y and element top
     startYDiff = 0;
 
-    constructor({ element, grabber, container, onStart, onMove, onEnd }) {
+    constructor({ element, item, grabber, container, onStart, onMove, onEnd }) {
 
         this.element = element;
+        this.item = item;
         this.grabber = grabber || element;
         this.container = container;
 
@@ -36,6 +37,12 @@ export default class DragPhysics {
      * @param {*} e 
      */
     #start(e){
+
+        //ignore if item is completed
+        if( this.item.completed ){
+            return;
+        }
+
         // Prevent default behavior for touch events
         if (e.type === 'touchstart'){ 
             e.preventDefault();

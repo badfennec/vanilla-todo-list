@@ -12,7 +12,7 @@ export default class Reactive {
     }
 
     next( newValue ){
-        this.value = newValue;
+        this.value = {  ...this.value, ...newValue };
         this.notyfy();
     }
 

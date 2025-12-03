@@ -1,9 +1,15 @@
 .badfennec-todo {
     background-color: #f9f9f9;
     display: grid;
-    gap: 10px;
+    gap: 20px;
     grid-template-columns: 1fr;
-    padding: 10px;
+    padding: 20px;
+
+    .badfennec-todo__not-completed-container, .badfennec-todo__completed-container {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
 
     &.badfennec-todo--dragging {
         -webkit-user-select: none;
@@ -16,7 +22,7 @@
         border: 1px solid #ddd;
         padding: 10px;
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         gap: 10px;
         box-sizing: border-box;
 
@@ -27,6 +33,14 @@
         &.badfennec-todo__item--placeholder {
             opacity: 0;
             transition: height .5s ease;
+        }
+
+        &.badfennec-todo__item--completed {
+            color: #888;
+
+            .badfennec-todo__text {
+                text-decoration: line-through;
+            }
         }
     }
 }
