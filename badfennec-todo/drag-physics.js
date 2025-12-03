@@ -94,7 +94,7 @@ export default class DragPhysics {
 
         // Notifica fine
         if (this.onEndCallback){ 
-            this.onEndCallback(this.#getY(e));
+            this.onEndCallback(this.element.getBoundingClientRect().top);
         }
     }
 }

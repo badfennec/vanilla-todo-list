@@ -29,7 +29,7 @@ export default class DragEvents {
             },
             
             onEnd: ( finalY ) => {
-                this.#onDragEnd( finalY);
+                this.#onDragEnd( finalY );
             }
         });
     }
@@ -82,8 +82,6 @@ export default class DragEvents {
 
         //remove class from entry being dragged
         entry.classList.remove('badfennec-todo__item--dragging');
-
-        this.ToDo.draggingItem = null;
 
         if( this.onDragEndCallback ){
             this.onDragEndCallback( finalY );

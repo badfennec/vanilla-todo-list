@@ -1,6 +1,8 @@
 
 import Reactive from './reactive.js'; 
 import TodoItem from './todo-item.js';
+import Sorting from './sort.js';
+
 import './badfennec-todo.css';
 
 export default class BadFennecTodo {
@@ -8,6 +10,8 @@ export default class BadFennecTodo {
     count = 0;
     updateCallback = null;
     rect = null;
+
+    items = [];
 
     delta = 0;
     dragY = 0;
@@ -32,17 +36,18 @@ export default class BadFennecTodo {
             this.el = el;
         }
 
-        this.items = [...items];
+        //this.items = [...items];
 
-        this.#setup();
+        this.#setup(items);
     }
 
-    #setup() {
+    #setup(items) {
 
         this.el.classList.add('badfennec-todo');
 
-        this.items.forEach(item => {
-            this.#addItemToDOM(item);
+        items.forEach(item => {
+            //item = ;
+            this.items.push(this.#addItem(item));
         });
 
         this.#addReactivity();
@@ -61,7 +66,7 @@ export default class BadFennecTodo {
         this.reactive.subscribe( subscibeCallback );
     }
 
-    #addItemToDOM(item) {
+    #addItem(item) {
         item = new TodoItem({ 
             ToDo: this, 
             item, 
@@ -78,6 +83,8 @@ export default class BadFennecTodo {
         });
 
         this.count++;
+
+        return item;
     }
 
     on( event, callback ) {
@@ -98,7 +105,7 @@ export default class BadFennecTodo {
     }
 
     #onDragEnd( finalY ) {
-        console.log('Drag Ended', this.dragY, finalY );
+        new Sorting({ ToDo: this, finalY });
         this.draggingItem = null;
         this.dragY = 0;
         this.delta = 0;

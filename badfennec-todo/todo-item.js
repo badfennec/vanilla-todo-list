@@ -2,6 +2,12 @@ import DragEvents from "./drag-events";
 
 export default class TodoItem {
 
+    completed = false;
+    key = null;
+    entry = null;
+    grabber = null;
+    startY = 0;
+
     constructor( args ) {
         const { ToDo, item, count, onDragStart, onDragMove, onDragEnd } = args;
         this.ToDo = ToDo;
@@ -9,62 +15,60 @@ export default class TodoItem {
 
         this.#setup( this.item, count );
 
-        new DragEvents({ ToDo: this.ToDo, item: this.item, onDragStartCallback: onDragStart, onDragMoveCallback: onDragMove, onDragEndCallback: onDragEnd });
-
-        return this.item;
+        new DragEvents({ ToDo: this.ToDo, item: this, onDragStartCallback: onDragStart, onDragMoveCallback: onDragMove, onDragEndCallback: onDragEnd });
     }
 
     #setup( item, count ){
-        item.key = count;
-        const entry = document.createElement('div');
-        entry.className = 'badfennec-todo__item';
-        item.entry = entry;
+        this.key = count;
+        this.entry = document.createElement('div');
+        this.entry.className = 'badfennec-todo__item';
+        this.completed = item.completed || false;
 
-        item.grabber = this.#addItemGrabber(item);
+        this.#addItemGrabber();        
 
-        this.#addItemCheckbox(item);
+        this.#addItemCheckbox();
 
-        this.#addItemText(item);
+        this.#addItemText();
+        this.ToDo.el.appendChild( this.entry );
 
-        this.ToDo.el.appendChild( item.entry );
+        this.setStartY();
     }
 
-    #addItemGrabber(item){
-        const { entry } = item;
-        const div = document.createElement('div');
-        const entryText = document.createTextNode('G');
-        div.appendChild(entryText);
-        entry.appendChild(div);
+    setStartY(){
+        this.startY = this.entry.getBoundingClientRect().top;
+    }
 
-        div.addEventListener('mouseover', () => {
+    #addItemGrabber(){
+        this.grabber = document.createElement('div');
+        const entryText = document.createTextNode('G');
+        this.grabber.appendChild(entryText);
+        this.entry.appendChild(this.grabber);
+
+        this.grabber.addEventListener('mouseover', () => {
             if( this.ToDo.draggingItem ) 
                 return;
             this.ToDo.el.style.cursor = 'grab';
         })
-        div.addEventListener('mouseout', () => {
+        this.grabber.addEventListener('mouseout', () => {
             if( this.ToDo.draggingItem ) 
                 return;
             this.ToDo.el.style.cursor = '';
         });
-
-        return div;
     }
 
-    #addItemCheckbox( item ){
-        const { entry } = item;
+    #addItemCheckbox(){
         const div = document.createElement('div');
         const checkbox = document.createElement('input');
         checkbox.setAttribute('type', 'checkbox');
-        checkbox.checked = item.completed;
+        checkbox.checked = this.completed;
         div.appendChild(checkbox);
-        entry.appendChild(div);
+        this.entry.appendChild(div);
     }
 
-    #addItemText(item){
-        const { entry } = item;
+    #addItemText(){
         const div = document.createElement('div');
-        entry.appendChild(div);
-        const entryText = document.createTextNode(item.text);
+        this.entry.appendChild(div);
+        const entryText = document.createTextNode(this.item.text);
         div.appendChild(entryText);
     }
 
