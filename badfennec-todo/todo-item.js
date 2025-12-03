@@ -74,9 +74,13 @@ export default class TodoItem {
     }
 
     #addItemGrabber(){
+        const container = document.createElement('div');
         this.grabber = document.createElement('div');
+        this.grabber.classList.add('badfennec-todo__grabber');
+        this.grabber.classList.add('badfennec-todo__shape');
         this.grabber.innerHTML = this.grabIcon;
-        this.entry.appendChild(this.grabber);
+        container.appendChild(this.grabber);
+        this.entry.appendChild(container);
 
         this.grabber.addEventListener('mouseover', () => {
             if( this.ToDo.draggingItem || this.completed ) 
@@ -95,7 +99,8 @@ export default class TodoItem {
 
         const button = document.createElement('div');
         this.checkbox = document.createElement('div');
-        this.checkbox.className = 'badfennec-todo__checkbox';
+        this.checkbox.classList.add('badfennec-todo__checkbox');
+        this.checkbox.classList.add('badfennec-todo__shape');
         this.checkbox.innerHTML = this.completed ? this.checkedIcon : this.uncheckedIcon;
         button.appendChild(this.checkbox);
         this.entry.appendChild(button);

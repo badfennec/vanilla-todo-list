@@ -20,10 +20,11 @@
     .badfennec-todo__item {
         background-color: #fff;
         border: 1px solid #ddd;
-        padding: 10px;
+        border-radius: 5px;
+        padding: 10px 12px;
         display: flex;
         align-items: flex-start;
-        gap: 10px;
+        gap: 12px;
         box-sizing: border-box;
 
         &.badfennec-todo__item--dragging {
@@ -40,6 +41,21 @@
 
             .badfennec-todo__text {
                 text-decoration: line-through;
+            }
+        }
+
+        .badfennec-todo__shape {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 1 / 1;
+            width: 18px;
+
+            svg {
+                display: block;
+                width: 100%;
+                height: auto;
             }
         }
     }
