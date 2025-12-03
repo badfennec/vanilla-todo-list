@@ -77,8 +77,6 @@ export default class BadFennecTodo {
             }
         });
 
-        this.el.appendChild( item.entry );
-
         this.count++;
     }
 

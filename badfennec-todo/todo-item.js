@@ -25,6 +25,8 @@ export default class TodoItem {
         this.#addItemCheckbox(item);
 
         this.#addItemText(item);
+
+        this.ToDo.el.appendChild( item.entry );
     }
 
     #addItemGrabber(item){
