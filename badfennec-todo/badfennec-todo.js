@@ -100,7 +100,8 @@ export default class BadFennecTodo {
 
     #onDragMove( deltaY ){
         this.reactive.next({
-            dragY: deltaY
+            dragY: deltaY,
+            items: this.items
         });
     }
 
