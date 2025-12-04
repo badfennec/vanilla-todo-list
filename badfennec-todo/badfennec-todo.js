@@ -158,7 +158,7 @@ export default class BadFennecTodo {
         }
 
         const sorting = new Sorting({ ToDo: this });
-        sorting.afterDrag( finalY );
+        sorting.afterDrag( finalY, this.dragIntersector.isOverWindow );
         this.draggingItem = null;
         this.dragY = 0;
         this.delta = 0;

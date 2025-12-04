@@ -131,13 +131,13 @@ export default class DragIntersector {
 
         const containerRect = this.ToDo.notCompletedContainer.getBoundingClientRect();
 
-        const overTop = this.ToDo.dragY < containerRect.top;
+        const overTop = this.ToDo.dragY < containerRect.top - this.ToDo.draggingItem.getHeight();
 
         if( overTop ){
             return -1;
         }
 
-        const overBottom = this.ToDo.dragY > containerRect.top + containerRect.height;
+        const overBottom = this.ToDo.dragY > containerRect.bottom - this.ToDo.draggingItem.getHeight();
 
         if( overBottom ){
             return 1;
@@ -160,33 +160,19 @@ export default class DragIntersector {
                 targetElement = this.ToDo.items.find( item => !item.completed && item !== this.ToDo.draggingItem );                
 
                 if( targetElement ) {
-                    //this.addPlaceholder({ element: targetElement.entry, insertMode: 'before' });
+                    this.addPlaceholder({ element: targetElement.entry, insertMode: 'before' });
                 }
             } else if( v === 1 ) {
                 targetElement = [...this.ToDo.items].reverse().find( item => !item.completed && item !== this.ToDo.draggingItem );                
 
                 if( targetElement ) {
-                    //this.addPlaceholder({ element: targetElement.entry, insertMode: 'after' });
+                    this.addPlaceholder({ element: targetElement.entry, insertMode: 'after' });
                 }
             }
         }
         
 
         return;
-
-        let targetElement = null;
-
-        if( v === -1 ) {
-            targetElement = this.ToDo.notCompletedContainer.firstChild !== this.ToDo.draggingItem.entry ? this.ToDo.notCompletedContainer.firstChild : this.ToDo.notCompletedContainer.firstChild?.nextSibling;
-
-            console.log( 'targetElement', targetElement );
-
-            /* if( targetElement ) {
-                this.addPlaceholder({ element: targetElement, insertMode: 'before' });
-            } */
-        } else if( v === 1 ) {
-            //this.addPlaceholder({ element: this.ToDo.notCompletedContainer.lastChild, insertMode: 'after' });
-        }
     }
 
     resetOverWindow(){
@@ -195,7 +181,10 @@ export default class DragIntersector {
             return;
         }
 
+        console.log( 'resetOverWindow' );
+
         this.isOverWindow = false;
+        this.resetPlaceholder();
     }
 
 }
