@@ -151,19 +151,24 @@ export default class BadFennecTodo {
     }
 
     #onDragEnd( finalY ) {
+        const sorting = new Sorting({ ToDo: this });
         this.dragIntersector.onIntersectionReset( this.lastIntersectedItem );
 
         if( this.placeholder ){
             this.placeholder.remove();
         }
 
-        const sorting = new Sorting({ ToDo: this });
-        sorting.afterDrag( finalY, this.dragIntersector.isOverWindow );
+        const insert = this.dragIntersector.afterDrag( finalY );
+
+        if( insert ){
+            sorting.startResort();
+        }
+        
         this.draggingItem = null;
         this.dragY = 0;
         this.delta = 0;
-        this.dragIntersector.resetPlaceholder();
-        this.dragIntersector.resetOverWindow();
+        /* this.dragIntersector.resetPlaceholder();
+        this.dragIntersector.resetOverWindow(); */
 
         if( sorting.hasSorted ){
             this.#updateCallback();

@@ -20,20 +20,14 @@ export default class DragIntersector {
             this.resetOverWindow();
         }
 
-        /* if( !this.isOverWindow ) {
-            this.setOverWindow( isOverWindow );
-        } else {
-            this.resetOverWindow();
-        } */
-
         //current dragged item
         const { entry } = this.ToDo.draggingItem;
 
         //get bounding rect of dragged item once
         const entryRect = entry.getBoundingClientRect();
 
-        //calculate middle Y of dragged item for intersection check
-        const entryMiddleY = entryRect.top + entryRect.height / 2;
+        //middle Y of dragged item
+        const entryMiddleY = this.ToDo.dragY + ( entryRect.height / 2 );
 
         this.ToDo.lastIntersectedItem = this.ToDo.items.find( item => {
 
@@ -154,7 +148,7 @@ export default class DragIntersector {
             console.log( 'setOverWindow', v ); 
             this.isOverWindow = v;
 
-            let targetElement = null;
+            /* let targetElement = null;
 
             if( v === -1 ) {
                 targetElement = this.ToDo.items.find( item => !item.completed && item !== this.ToDo.draggingItem );                
@@ -168,7 +162,7 @@ export default class DragIntersector {
                 if( targetElement ) {
                     this.addPlaceholder({ element: targetElement.entry, insertMode: 'after' });
                 }
-            }
+            } */
         }
         
 
@@ -184,7 +178,44 @@ export default class DragIntersector {
         console.log( 'resetOverWindow' );
 
         this.isOverWindow = false;
-        this.resetPlaceholder();
+        //this.resetPlaceholder();
+    }
+
+    afterDrag( finalY ) {
+
+        //calculate difference between startY and finalY
+        const diff = Math.abs( finalY - this.ToDo.draggingItem.startY );
+
+        //if difference is significant, perform sort
+        if( diff > 0 && this.ToDo.lastIntersectedItem && !this.ToDo.lastIntersectedItem.completed ) {
+
+            if( this.ToDo.delta < 0 ) {
+                this.ToDo.notCompletedContainer.insertBefore( this.ToDo.draggingItem.entry, this.ToDo.lastIntersectedItem.entry );
+            } else {
+                this.ToDo.notCompletedContainer.insertBefore( this.ToDo.draggingItem.entry, this.ToDo.lastIntersectedItem.entry.nextSibling );
+            }
+
+            return true;
+        }
+
+        if( this.isOverWindow ) {
+            if( this.isOverWindow === -1 ) {
+                //insert at start
+                const firstItem = this.ToDo.items.find( item => !item.completed && item !== this.ToDo.draggingItem );
+                if( firstItem ) {
+                    this.ToDo.notCompletedContainer.insertBefore( this.ToDo.draggingItem.entry, firstItem.entry );
+                    return true;
+                }
+            } else if( this.isOverWindow === 1 ) {
+                const lastItem = [...this.ToDo.items].reverse().find( item => !item.completed && item !== this.ToDo.draggingItem );
+                if( lastItem ) {
+                    this.ToDo.notCompletedContainer.insertBefore( this.ToDo.draggingItem.entry, lastItem.entry.nextSibling );
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
 }
