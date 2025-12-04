@@ -29,7 +29,8 @@ export default class DragPhysics {
     }
 
     #getY(e) {
-        return e.clientY || e.touches[0].clientY || 0;
+        const y = e.clientY || (e.touches && e.touches[0].clientY);
+        return y || 1;
     }
 
     /**

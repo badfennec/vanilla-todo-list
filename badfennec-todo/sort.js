@@ -9,13 +9,21 @@ export default class Sorting {
     }
 
     afterDrag( finalY ) {
-        //if there is a placeholder and its position has changed
-        if( this.ToDo.placeholder && this.ToDo.placeholder.parentNode && this.ToDo.placeholder.getBoundingClientRect().top !== this.item.startY ) {
 
-            //replace placeholder with the dragged item
-            this.#replacePlaceholder();
+        //calculate difference between startY and finalY
+        const diff = Math.abs( finalY - this.item.startY );
+
+        //if difference is significant, perform sort
+        if( diff > 0 && this.ToDo.lastIntersectedItem && !this.ToDo.lastIntersectedItem.completed ) {
+
+            if( this.ToDo.delta < 0 ) {
+                this.ToDo.notCompletedContainer.insertBefore( this.item.entry, this.ToDo.lastIntersectedItem.entry );
+            } else {
+                this.ToDo.notCompletedContainer.insertBefore( this.item.entry, this.ToDo.lastIntersectedItem.entry.nextSibling );
+            }
+
             this.#startResort();
-            
+
             return;
         }
 
@@ -30,10 +38,6 @@ export default class Sorting {
         this.#sortItems();
 
         this.hasSorted = true;
-    }
-
-    #replacePlaceholder(){
-        this.ToDo.placeholder.replaceWith(this.item.entry);
     }
 
     #resetOffsets(){

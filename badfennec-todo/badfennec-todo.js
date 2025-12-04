@@ -2,6 +2,7 @@
 import Reactive from './reactive.js'; 
 import TodoItem from './todo-item.js';
 import Sorting from './sort.js';
+import DragIntersector from './drag-intersector.js';
 
 import './badfennec-todo.css';
 
@@ -17,6 +18,7 @@ export default class BadFennecTodo {
     dragY = 0;
 
     draggingItem = null;
+    lastIntersectedItem = null;
     draggingItemOriginY = 0;
 
     placeholder = null;
@@ -24,7 +26,9 @@ export default class BadFennecTodo {
     reactive = null;
     reactiveSubscriber = null;
 
-    container = null;
+    dragIntersector = null;
+
+    notCompletedContainer = null;
     completedContainer = null;
 
     constructor({ el, items = [] }) {
@@ -56,6 +60,7 @@ export default class BadFennecTodo {
         });
 
         this.#addReactivity();
+        this.#addIntersector();
     }
 
     #addReactivity(){
@@ -67,10 +72,16 @@ export default class BadFennecTodo {
         const subscibeCallback = ( value ) => {
             this.#onDeltaChange( value.dragY );
 
-            this.#completedHandler();
+            if( !this.draggingItem ) {
+                this.#completedHandler();
+            }            
 		}
 
         this.reactive.subscribe( subscibeCallback );
+    }
+
+    #addIntersector(){
+        this.dragIntersector = new DragIntersector(this);
     }
 
     #addItem(item) {
@@ -120,12 +131,19 @@ export default class BadFennecTodo {
         }
     }
 
+    /**
+     * Triggered when drag starts
+     * @param {*} item 
+     */
     #onDragStart( item ){
         this.draggingItem = item;
-        this.#addPlaceholder({ element: this.draggingItem.entry });
+
+        //Add placeholder at original position to not collapse list
+        this.dragIntersector.addPlaceholder({ element: this.draggingItem.entry });
     }
 
     #onDragMove( deltaY ){
+
         this.reactive.next({
             dragY: deltaY,
             //items: this.items
@@ -133,34 +151,53 @@ export default class BadFennecTodo {
     }
 
     #onDragEnd( finalY ) {
+        this.dragIntersector.onIntersectionReset( this.lastIntersectedItem );
+
+        if( this.placeholder ){
+            this.placeholder.remove();
+        }
+
         const sorting = new Sorting({ ToDo: this });
         sorting.afterDrag( finalY );
         this.draggingItem = null;
         this.dragY = 0;
         this.delta = 0;
-        this.#resetPlaceholder();
+        this.dragIntersector.resetPlaceholder();
+        this.dragIntersector.resetOverWindow();
 
-        if( sorting.hasSorted )
+        if( sorting.hasSorted ){
             this.#updateCallback();
+        }
     }
 
-    #addPlaceholder({ element, insertMode = 'before' }){
+    /**
+     * Add a placeholder element at the original position of the dragged item
+     * to prevent the list from collapsing during drag.
+     * @param {*} param0 
+     */
+    /* #addPlaceholder({ element, insertMode = 'before' }){
 
+        //only add placeholder if the element is in the not completed container
         if( element.parentNode !== this.notCompletedContainer ){
             return;
         }
 
+        //remove existing placeholder
         if( this.placeholder ) {
+            this.placeholder.remove();
             this.#resetPlaceholder();
         }
 
+        //create placeholder if not existing only once
         if( !this.placeholder ){
             this.placeholder = document.createElement('div');
             this.placeholder.className = 'badfennec-todo__item badfennec-todo__item--placeholder';
         }
 
-        this.placeholder.style.height = `${this.draggingItem.entry.offsetHeight}px`;
+        //set height of placeholder to match dragged item height
+        this.placeholder.style.paddingTop = `${this.draggingItem.getHeight()}px`;
 
+        //insert placeholder before or after the element based on insertMode
         if( insertMode === 'before' ){
             this.notCompletedContainer.insertBefore( this.placeholder, element );
         } else {
@@ -170,9 +207,9 @@ export default class BadFennecTodo {
 
     #resetPlaceholder(){
         if( this.placeholder ) {
-            this.placeholder.remove();
+            this.placeholder.style.paddingTop = `0px`;
         }
-    }
+    } */
 
     #onDeltaChange( dragY ){
         if( dragY === this.dragY ){
@@ -181,10 +218,10 @@ export default class BadFennecTodo {
 
         this.delta = this.dragY - dragY > 0 ? -1 : 1;
         this.dragY = dragY;
-        this.#checkIntersections();
+        this.dragIntersector.checkIntersections();
     }
 
-    #checkIntersections(){
+    /* #checkIntersections(){
 
         if( !this.draggingItem ) {
             return;
@@ -199,7 +236,7 @@ export default class BadFennecTodo {
         //calculate middle Y of dragged item for intersection check
         const entryMiddleY = entryRect.top + entryRect.height / 2;
 
-        const intersecting = this.items.find( item => {
+        this.lastIntersectedItem = this.items.find( item => {
 
             //skip self
             if( item === this.draggingItem ) {
@@ -212,33 +249,49 @@ export default class BadFennecTodo {
         });
 
         //manage intersection visual feedback
-        if( intersecting ) {
-            this.#onIntersection( intersecting );
+        if( this.lastIntersectedItem ) {
+            this.#resetPlaceholder();
+            this.#onIntersection();
         }
 
         //reset others items
         this.items.forEach( item => {
-            if( item !== intersecting || item === this.draggingItem ) {
+            if( item !== this.lastIntersectedItem || item === this.draggingItem ) {
                 this.#onIntersectionReset( item );
             }
         });
-    }
+    } */
 
-    #onIntersection( intersectedItem ){
+    /* #onIntersection(){
 
-        if( this.delta < 0 ) {
-            this.#addPlaceholder({ element: intersectedItem.entry, insertMode: 'before' });
-        } else {
-            this.#addPlaceholder({ element: intersectedItem.entry, insertMode: 'after' });
+        if( this.lastIntersectedItem.completed ){
+            return;
         }
-    }
 
-    //called to reset visual state of item after intersection
+        //adjust padding to show space for dragged item with margin
+        const height = this.draggingItem.getHeight();
+
+        //apply padding based on drag direction
+        if( this.delta < 0 ) {
+            this.lastIntersectedItem.entry.style.paddingTop = `${height}px`;
+            this.lastIntersectedItem.entry.style.paddingBottom = 0;
+        } else {
+            this.lastIntersectedItem.entry.style.paddingTop = 0;
+            this.lastIntersectedItem.entry.style.paddingBottom = `${height}px`;
+        }
+    } */
+
+    /* //called to reset visual state of item after intersection
     #onIntersectionReset( item ){
-        
-    }
 
-    #completeCallback( item ){
+        if( !item )
+            return;
+
+        item.entry.style.paddingTop = `0px`;
+        item.entry.style.paddingBottom = `0px`;
+    } */
+
+    #completeCallback(){
         
         this.reactive.next({
             items: this.items
@@ -270,7 +323,9 @@ export default class BadFennecTodo {
 
         this.items.forEach( ( item, currentIndex ) => {
 
-            if( item.completed ) {               
+            if( item.completed ) {   
+                
+                completedCount++;
 
                 //item is completed and not in completed container
                 if( item.entry.parentNode !== this.completedContainer ) {
@@ -296,12 +351,12 @@ export default class BadFennecTodo {
             }            
 
             item.setStartY();
-            completedCount++;
         });
 
         if( completedCount > 0 ) {
             this.el.insertBefore( this.completedContainer, this.notCompletedContainer.nextSibling );
         } else {
+            console.log('revove completed container');  
             this.completedContainer.remove();
         }
 
