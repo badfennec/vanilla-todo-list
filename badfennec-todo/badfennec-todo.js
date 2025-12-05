@@ -56,33 +56,25 @@ export default class BadFennecTodo {
         });
 
         this.#addIntersector();
-        this.#addReactivity();
         this.#completedHandler();
+        this.#addReactivity();
     }
 
     #addReactivity(){
         this.reactive = new Reactive({
-            dragY: this.dragY,
-            items: this.items,
+            event: null,
         });
 
-        const subscribeCallback = ( value ) => {
+        const eventsSubscribe = ( value ) => {
 
-            const { dragY, items } = value;
-
-            this.#onDeltaChange( dragY );          
-
-            if( !this.draggingItem ) {
-
-                if( this.items !== items ) {
-                    this.items = items;
-                    this.events.update( [...this.items] );
-                    this.#completedHandler();
-                }
-            } 
+            const { event } = value;
+            
+            if( ['sort', 'delete', 'toggle'].includes( event ) ){
+                this.events.update( [...this.items] );
+            }
 		}
 
-        this.reactive.subscribe( subscribeCallback );
+        this.reactive.subscribe( eventsSubscribe );
     }
 
     #addIntersector(){
@@ -104,7 +96,7 @@ export default class BadFennecTodo {
                 this.#onDragEnd( finalY );
             },
             onUpdate: ( item ) => {
-                this.#onItemUpdate( item );
+                this.#onItemToggle( item );
             },
             onDelete: ( item ) => {
                 this.#onDelete(item);
@@ -149,9 +141,7 @@ export default class BadFennecTodo {
     }
 
     #onDragMove( deltaY ){
-        this.reactive.next({
-            dragY: deltaY
-        });
+        this.#onDeltaChange( deltaY );
     }
 
     #onDragEnd( finalY ) {
@@ -168,8 +158,9 @@ export default class BadFennecTodo {
         this.delta = 0;
 
         if( sorting.hasSorted ){
+            this.items = [...sorting.items];
             this.reactive.next({
-                items: [...sorting.items],
+                event: 'sort'
             });
         }
     }
@@ -185,21 +176,20 @@ export default class BadFennecTodo {
     }
 
     #onDelete( item ){
-        const items = this.items.filter( i => i !== item );
-
+        this.items = this.items.filter( i => i !== item );
+        this.events.delete( { item: {...item}, items: [...this.items] } );
         this.reactive.next({
-            items: items
+            event: 'delete'
         });
-
-        this.events.delete( { item: {...item}, items: [...items] } );
     }
 
-    #onItemUpdate( item ){        
-        this.reactive.next({
-            items: [...this.items]
-        });
+    #onItemToggle( item ){
 
+        this.#completedHandler();
         this.events.toggle( { item: {...item}, items: [...this.items] } );
+        this.reactive.next({
+            event: 'toggle'
+        });
     }
 
     #completedHandler(){
