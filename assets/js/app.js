@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const items = [
         { text: 'Learn JavaScript', completed: false },
         { text: 'Build a Todo App', completed: false },
-        { text: 'Write documentation Write documentation Write documentation Write documentation Write documentation', completed: true },
+        { text: 'Write documentation Write documentation Write documentation Write documentation Write documentation', completed: false },
         { text: 'Profit!', completed: false },
         { text: 'Review code', completed: true },
         { text: 'Deploy application', completed: false },
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
         items: items
     }); 
 
-    /* todoApp.on('update', ({ items }) => {
+    todoApp.on('update', ({ items }) => {
         console.log('Todo items updated:', items);
     });
 
@@ -27,5 +27,5 @@ document.addEventListener('DOMContentLoaded', function() {
 
     todoApp.on('delete', ({ item, items }) => {
         console.log('Todo item deleted:', item, items);
-    }); */
+    });
 })
