@@ -27,7 +27,7 @@
         
         .badfennec-todo__item-container {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 10px;
             padding: 10px;
             background-color: #fff;

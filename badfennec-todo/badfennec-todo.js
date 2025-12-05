@@ -3,13 +3,13 @@ import Reactive from './reactive.js';
 import TodoItem from './todo-item.js';
 import Sorting from './sort.js';
 import DragIntersector from './drag-intersector.js';
+import Callbacks from './callbaks.js';
 
 import './badfennec-todo.css';
 
 export default class BadFennecTodo {
 
     count = 0;
-    updateCallback = null;
     rect = null;
 
     items = [];
@@ -27,6 +27,8 @@ export default class BadFennecTodo {
 
     notCompletedContainer = null;
     completedContainer = null;
+
+    callbacks = new Callbacks();        
 
     constructor({ el, items = [] }) {
         
@@ -94,7 +96,10 @@ export default class BadFennecTodo {
                 this.#onDragEnd( finalY );
             },
             onComplete: ( item ) => {
-                this.#completeCallback( item );
+                this.#onChange( item );
+            },
+            onDelete: ( item ) => {
+                this.#onDelete(item);
             }
         });
 
@@ -121,9 +126,7 @@ export default class BadFennecTodo {
     }
 
     on( event, callback ) {
-        if( event === 'update' ) {
-            this.updateCallback = callback;
-        }
+        this.callbacks.add(event, callback);
     }
 
     /**
@@ -159,7 +162,7 @@ export default class BadFennecTodo {
         this.delta = 0;
 
         if( sorting.hasSorted ){
-            this.#updateCallback();
+            this.callbacks.update( this.items);
         }
     }
 
@@ -173,30 +176,24 @@ export default class BadFennecTodo {
         this.dragIntersector.checkIntersections();
     }
 
-    #completeCallback(){
+    #onDelete( item ){
+        this.items = this.items.filter( i => i !== item );
+
+        this.reactive.next({
+            items: this.items
+        });
+
+        this.callbacks.delete( item );
+        this.callbacks.update( this.items);
+    }
+
+    #onChange(){
         
         this.reactive.next({
             items: this.items
         });
         
-        this.#updateCallback();
-    }
-
-    #updateCallback(){
-
-        if( !this.updateCallback )
-            return;
-
-        const items = [];
-
-        this.items.forEach( item => {
-            items.push({
-                completed: item.completed,
-                text: item.text
-            });
-        } );
-
-        this.updateCallback({ items });
+        this.callbacks.update( this.items);
     }
 
     #completedHandler(){

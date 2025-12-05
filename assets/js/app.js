@@ -19,4 +19,8 @@ document.addEventListener('DOMContentLoaded', function() {
     todoApp.on('update', ({ items }) => {
         console.log('Todo items updated:', items);
     });
+
+    todoApp.on('delete', ( item ) => {
+        console.log('Todo item deleted:', item);
+    });
 })

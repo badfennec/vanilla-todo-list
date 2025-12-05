@@ -5,7 +5,6 @@ export default class Sorting {
 
     constructor({ ToDo }) {
         this.ToDo = ToDo;
-        this.item = this.ToDo.draggingItem;
     }
 
     startResort(){
