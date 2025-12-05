@@ -1,6 +1,8 @@
 export default class DragIntersector {
 
+    placeholder = null;
     isOverWindow = false;
+    lastIntersectedItem = null;
     
     constructor( ToDo ) {
         this.ToDo = ToDo;
@@ -20,6 +22,10 @@ export default class DragIntersector {
             this.resetOverWindow();
         }
 
+        if( this.isOverWindow ) {
+            return;
+        }
+
         //current dragged item
         const { entry } = this.ToDo.draggingItem;
 
@@ -29,9 +35,9 @@ export default class DragIntersector {
         //middle Y of dragged item
         const entryMiddleY = this.ToDo.dragY + ( entryRect.height / 2 );
 
-        this.ToDo.lastIntersectedItem = this.ToDo.items.find( item => {
+        const lastIntersectedItem = this.ToDo.items.find( item => {
 
-            //skip self
+            //skip self or completed items
             if( item === this.ToDo.draggingItem || item.completed ) {
                 return false;
             }
@@ -42,32 +48,37 @@ export default class DragIntersector {
         });
 
         //manage intersection visual feedback
-        if( this.ToDo.lastIntersectedItem ) {
+        if( lastIntersectedItem ) {
+
+            this.lastIntersectedItem = lastIntersectedItem;
+
+            //reset placeholder first to avoid doble padding
             this.resetPlaceholder();
             this.onIntersection();
+        } else {
+            return;
         }
 
         //reset others items
         this.ToDo.items.forEach( item => {
-            if( item !== this.ToDo.lastIntersectedItem || item === this.ToDo.draggingItem ) {
+            if( item !== this.lastIntersectedItem ) {
                 this.onIntersectionReset( item );
             }
         });
     }
 
-    onIntersection(){
+    onIntersection( delta ){
+
+        if( !this.lastIntersectedItem || this.lastIntersectedItem.spaceAvailable ){
+            return;
+        }
+
+        delta = delta || this.ToDo.delta;
 
         //adjust padding to show space for dragged item with margin
         const height = this.ToDo.draggingItem.getFullHeight();
-
-        //apply padding based on drag direction
-        if( this.ToDo.delta < 0 ) {
-            this.ToDo.lastIntersectedItem.entry.style.paddingTop = `${height}px`;
-            this.ToDo.lastIntersectedItem.entry.style.paddingBottom = 0;
-        } else {
-            this.ToDo.lastIntersectedItem.entry.style.paddingTop = 0;
-            this.ToDo.lastIntersectedItem.entry.style.paddingBottom = `${height}px`;
-        }
+        const position = delta < 0 ? 'top' : 'bottom';
+        this.lastIntersectedItem.setSpaceAvailable({position, height});
     }
 
     //called to reset visual state of item after intersection
@@ -76,8 +87,7 @@ export default class DragIntersector {
         if( !item )
             return;
 
-        item.entry.style.paddingTop = `0px`;
-        item.entry.style.paddingBottom = `0px`;
+        item.resetSpaceAvailable();
     }
 
     /**
@@ -93,31 +103,35 @@ export default class DragIntersector {
         }
 
         //remove existing placeholder
-        if( this.ToDo.placeholder ) {
-            this.ToDo.placeholder.remove();
-            this.resetPlaceholder();
-        }
+        this.removePlaceholder();
 
         //create placeholder if not existing only once
-        if( !this.ToDo.placeholder ){
-            this.ToDo.placeholder = document.createElement('div');
-            this.ToDo.placeholder.className = 'badfennec-todo__item badfennec-todo__item--placeholder';
+        if( !this.placeholder ){
+            this.placeholder = document.createElement('div');
+            this.placeholder.className = 'badfennec-todo__item badfennec-todo__item--placeholder';
         }
 
         //set height of placeholder to match dragged item height
-        this.ToDo.placeholder.style.paddingTop = `${this.ToDo.draggingItem.getFullHeight()}px`;
+        this.placeholder.style.paddingTop = `${this.ToDo.draggingItem.getFullHeight()}px`;
 
         //insert placeholder before or after the element based on insertMode
         if( insertMode === 'before' ){
-            this.ToDo.notCompletedContainer.insertBefore( this.ToDo.placeholder, element );
+            this.ToDo.notCompletedContainer.insertBefore( this.placeholder, element );
         } else {
-            this.ToDo.notCompletedContainer.insertBefore( this.ToDo.placeholder, element.nextSibling );
+            this.ToDo.notCompletedContainer.insertBefore( this.placeholder, element.nextSibling );
         }
     }
 
     resetPlaceholder(){
-        if( this.ToDo.placeholder ) {
-            this.ToDo.placeholder.style.paddingTop = `0px`;
+        if( this.placeholder ) {
+            this.placeholder.style.paddingTop = `0px`;
+        }
+    }
+
+    removePlaceholder(){
+        if( this.placeholder ){
+            this.placeholder.remove();
+            this.resetPlaceholder();
         }
     }
 
@@ -145,24 +159,25 @@ export default class DragIntersector {
         if( this.isOverWindow ){                    
             return;            
         } else {
-            console.log( 'setOverWindow', v ); 
             this.isOverWindow = v;
 
-            /* let targetElement = null;
+            let targetElement = null;
 
             if( v === -1 ) {
-                targetElement = this.ToDo.items.find( item => !item.completed && item !== this.ToDo.draggingItem );                
-
-                if( targetElement ) {
-                    this.addPlaceholder({ element: targetElement.entry, insertMode: 'before' });
-                }
+                targetElement = this.ToDo.items.find( item => !item.completed && item !== this.ToDo.draggingItem );
             } else if( v === 1 ) {
-                targetElement = [...this.ToDo.items].reverse().find( item => !item.completed && item !== this.ToDo.draggingItem );                
+                targetElement = [...this.ToDo.items].reverse().find( item => !item.completed && item !== this.ToDo.draggingItem );
+            }
 
-                if( targetElement ) {
-                    this.addPlaceholder({ element: targetElement.entry, insertMode: 'after' });
-                }
-            } */
+            if( targetElement ) {
+                this.lastIntersectedItem = targetElement;
+
+                //reset placeholder first to avoid doble padding
+                this.resetPlaceholder();
+
+                //apply intersection effect to target element
+                this.onIntersection( v );
+            }
         }
         
 
@@ -175,44 +190,29 @@ export default class DragIntersector {
             return;
         }
 
-        console.log( 'resetOverWindow' );
-
         this.isOverWindow = false;
-        //this.resetPlaceholder();
     }
 
     afterDrag( finalY ) {
+
+        //remove also margin placeholder
+        this.removePlaceholder();
 
         //calculate difference between startY and finalY
         const diff = Math.abs( finalY - this.ToDo.draggingItem.startY );
 
         //if difference is significant, perform sort
-        if( diff > 0 && this.ToDo.lastIntersectedItem && !this.ToDo.lastIntersectedItem.completed ) {
+        if( diff > 0 && this.lastIntersectedItem && !this.lastIntersectedItem.completed ) {
 
-            if( this.ToDo.delta < 0 ) {
-                this.ToDo.notCompletedContainer.insertBefore( this.ToDo.draggingItem.entry, this.ToDo.lastIntersectedItem.entry );
+            if( this.lastIntersectedItem.spaceAvailable === 'top' ) {
+                this.ToDo.notCompletedContainer.insertBefore( this.ToDo.draggingItem.entry, this.lastIntersectedItem.entry );
             } else {
-                this.ToDo.notCompletedContainer.insertBefore( this.ToDo.draggingItem.entry, this.ToDo.lastIntersectedItem.entry.nextSibling );
+                this.ToDo.notCompletedContainer.insertBefore( this.ToDo.draggingItem.entry, this.lastIntersectedItem.entry.nextSibling );
             }
+
+            this.onIntersectionReset( this.lastIntersectedItem );
 
             return true;
-        }
-
-        if( this.isOverWindow ) {
-            if( this.isOverWindow === -1 ) {
-                //insert at start
-                const firstItem = this.ToDo.items.find( item => !item.completed && item !== this.ToDo.draggingItem );
-                if( firstItem ) {
-                    this.ToDo.notCompletedContainer.insertBefore( this.ToDo.draggingItem.entry, firstItem.entry );
-                    return true;
-                }
-            } else if( this.isOverWindow === 1 ) {
-                const lastItem = [...this.ToDo.items].reverse().find( item => !item.completed && item !== this.ToDo.draggingItem );
-                if( lastItem ) {
-                    this.ToDo.notCompletedContainer.insertBefore( this.ToDo.draggingItem.entry, lastItem.entry.nextSibling );
-                    return true;
-                }
-            }
         }
 
         return false;

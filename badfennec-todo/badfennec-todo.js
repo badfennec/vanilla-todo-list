@@ -18,10 +18,7 @@ export default class BadFennecTodo {
     dragY = 0;
 
     draggingItem = null;
-    lastIntersectedItem = null;
     draggingItemOriginY = 0;
-
-    placeholder = null;
 
     reactive = null;
     reactiveSubscriber = null;
@@ -42,8 +39,6 @@ export default class BadFennecTodo {
         } else {
             this.el = el;
         }
-
-        //this.items = [...items];
 
         this.#setup(items);
     }
@@ -152,11 +147,6 @@ export default class BadFennecTodo {
 
     #onDragEnd( finalY ) {
         const sorting = new Sorting({ ToDo: this });
-        this.dragIntersector.onIntersectionReset( this.lastIntersectedItem );
-
-        if( this.placeholder ){
-            this.placeholder.remove();
-        }
 
         const insert = this.dragIntersector.afterDrag( finalY );
 
@@ -167,54 +157,11 @@ export default class BadFennecTodo {
         this.draggingItem = null;
         this.dragY = 0;
         this.delta = 0;
-        /* this.dragIntersector.resetPlaceholder();
-        this.dragIntersector.resetOverWindow(); */
 
         if( sorting.hasSorted ){
             this.#updateCallback();
         }
     }
-
-    /**
-     * Add a placeholder element at the original position of the dragged item
-     * to prevent the list from collapsing during drag.
-     * @param {*} param0 
-     */
-    /* #addPlaceholder({ element, insertMode = 'before' }){
-
-        //only add placeholder if the element is in the not completed container
-        if( element.parentNode !== this.notCompletedContainer ){
-            return;
-        }
-
-        //remove existing placeholder
-        if( this.placeholder ) {
-            this.placeholder.remove();
-            this.#resetPlaceholder();
-        }
-
-        //create placeholder if not existing only once
-        if( !this.placeholder ){
-            this.placeholder = document.createElement('div');
-            this.placeholder.className = 'badfennec-todo__item badfennec-todo__item--placeholder';
-        }
-
-        //set height of placeholder to match dragged item height
-        this.placeholder.style.paddingTop = `${this.draggingItem.getHeight()}px`;
-
-        //insert placeholder before or after the element based on insertMode
-        if( insertMode === 'before' ){
-            this.notCompletedContainer.insertBefore( this.placeholder, element );
-        } else {
-            this.notCompletedContainer.insertBefore( this.placeholder, element.nextSibling );
-        }
-    }
-
-    #resetPlaceholder(){
-        if( this.placeholder ) {
-            this.placeholder.style.paddingTop = `0px`;
-        }
-    } */
 
     #onDeltaChange( dragY ){
         if( dragY === this.dragY ){
@@ -225,76 +172,6 @@ export default class BadFennecTodo {
         this.dragY = dragY;
         this.dragIntersector.checkIntersections();
     }
-
-    /* #checkIntersections(){
-
-        if( !this.draggingItem ) {
-            return;
-        }
-
-        //current dragged item
-        const { entry } = this.draggingItem;
-
-        //get bounding rect of dragged item once
-        const entryRect = entry.getBoundingClientRect();
-
-        //calculate middle Y of dragged item for intersection check
-        const entryMiddleY = entryRect.top + entryRect.height / 2;
-
-        this.lastIntersectedItem = this.items.find( item => {
-
-            //skip self
-            if( item === this.draggingItem ) {
-                return false;
-            }
-
-            //check if item intersects with dragged item
-            return item.entry.getBoundingClientRect().top < entryRect.bottom &&
-                item.entry.getBoundingClientRect().bottom > entryMiddleY;
-        });
-
-        //manage intersection visual feedback
-        if( this.lastIntersectedItem ) {
-            this.#resetPlaceholder();
-            this.#onIntersection();
-        }
-
-        //reset others items
-        this.items.forEach( item => {
-            if( item !== this.lastIntersectedItem || item === this.draggingItem ) {
-                this.#onIntersectionReset( item );
-            }
-        });
-    } */
-
-    /* #onIntersection(){
-
-        if( this.lastIntersectedItem.completed ){
-            return;
-        }
-
-        //adjust padding to show space for dragged item with margin
-        const height = this.draggingItem.getHeight();
-
-        //apply padding based on drag direction
-        if( this.delta < 0 ) {
-            this.lastIntersectedItem.entry.style.paddingTop = `${height}px`;
-            this.lastIntersectedItem.entry.style.paddingBottom = 0;
-        } else {
-            this.lastIntersectedItem.entry.style.paddingTop = 0;
-            this.lastIntersectedItem.entry.style.paddingBottom = `${height}px`;
-        }
-    } */
-
-    /* //called to reset visual state of item after intersection
-    #onIntersectionReset( item ){
-
-        if( !item )
-            return;
-
-        item.entry.style.paddingTop = `0px`;
-        item.entry.style.paddingBottom = `0px`;
-    } */
 
     #completeCallback(){
         
