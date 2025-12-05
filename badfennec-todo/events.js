@@ -1,7 +1,8 @@
 export default class Events {
     callbacks = {
         update: null,
-        delete: null
+        toggle: null,
+        delete: null,
     };
 
     getPublicItem( todoItem ){
@@ -33,10 +34,21 @@ export default class Events {
         this.callbacks.update({ items });
     }
 
-    delete( todoItem ){
+    toggle( {item, items} ){
+        if( !this.callbacks.toggle )
+            return;
+
+        const parsedItems = items.map( todoItem => this.getPublicItem( todoItem ) );
+
+        this.callbacks.toggle({ item: this.getPublicItem( item ), items: parsedItems });
+    }
+
+    delete( {item, items} ){
         if( !this.callbacks.delete )
             return;
 
-        this.callbacks.delete( this.getPublicItem( todoItem ) );
+        const parsedItems = items.map( todoItem => this.getPublicItem( todoItem ) );
+
+        this.callbacks.delete({ item: this.getPublicItem( item ), items: parsedItems });
     }
 }

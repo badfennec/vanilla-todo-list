@@ -5,10 +5,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const items = [
         { text: 'Learn JavaScript', completed: false },
         { text: 'Build a Todo App', completed: false },
+        { text: 'Write documentation Write documentation Write documentation Write documentation Write documentation', completed: true },
         { text: 'Profit!', completed: false },
         { text: 'Review code', completed: true },
         { text: 'Deploy application', completed: false },
-        { text: 'Write documentation Write documentation Write documentation Write documentation Write documentation', completed: true }
+        
     ];
 
     const todoApp = new Todo({
@@ -16,11 +17,15 @@ document.addEventListener('DOMContentLoaded', function() {
         items: items
     }); 
 
-    todoApp.on('update', ({ items }) => {
+    /* todoApp.on('update', ({ items }) => {
         console.log('Todo items updated:', items);
     });
 
-    todoApp.on('delete', ( item ) => {
-        console.log('Todo item deleted:', item);
+    todoApp.on('toggle', ({ item, items }) => {
+        console.log('Todo item toggled:', item, items);
     });
+
+    todoApp.on('delete', ({ item, items }) => {
+        console.log('Todo item deleted:', item, items);
+    }); */
 })

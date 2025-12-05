@@ -62,4 +62,5 @@ todoApp.on('update', ({ items }) => {
 | Event Type          | Description                                                                                                                  |
 | ------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | update                | Fired whenever the list is modified. This includes reordering via drag & drop and status changes (checked/unchecked). The payload contains the new ordered array of items.
+| toogle               | Fired when an item is checked or unchecked.
 | delete               | Fired when an item is removed from the list. The payload contains the removed item
