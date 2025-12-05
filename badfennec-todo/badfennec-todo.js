@@ -3,7 +3,7 @@ import Reactive from './reactive.js';
 import TodoItem from './todo-item.js';
 import Sorting from './sort.js';
 import DragIntersector from './drag-intersector.js';
-import Callbacks from './callbaks.js';
+import Events from './events.js';
 
 import './badfennec-todo.css';
 
@@ -28,7 +28,7 @@ export default class BadFennecTodo {
     notCompletedContainer = null;
     completedContainer = null;
 
-    callbacks = new Callbacks();        
+    events = new Events();        
 
     constructor({ el, items = [] }) {
         
@@ -126,7 +126,7 @@ export default class BadFennecTodo {
     }
 
     on( event, callback ) {
-        this.callbacks.add(event, callback);
+        this.events.add(event, callback);
     }
 
     /**
@@ -162,7 +162,7 @@ export default class BadFennecTodo {
         this.delta = 0;
 
         if( sorting.hasSorted ){
-            this.callbacks.update( this.items);
+            this.events.update( this.items);
         }
     }
 
@@ -183,8 +183,8 @@ export default class BadFennecTodo {
             items: this.items
         });
 
-        this.callbacks.delete( item );
-        this.callbacks.update( this.items);
+        this.events.delete( item );
+        this.events.update( this.items);
     }
 
     #onChange(){
@@ -193,7 +193,7 @@ export default class BadFennecTodo {
             items: this.items
         });
         
-        this.callbacks.update( this.items);
+        this.events.update( this.items);
     }
 
     #completedHandler(){

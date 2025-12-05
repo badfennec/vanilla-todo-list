@@ -1,4 +1,4 @@
-export default class Callbacks {
+export default class Events {
     callbacks = {
         update: null,
         delete: null
@@ -12,8 +12,11 @@ export default class Callbacks {
     }
 
     add( event, callback ) {
+        
         if( event in this.callbacks ) {
             this.callbacks[event] = callback;
+        } else {
+            console.warn(`Event "${event}" is not supported.`);
         }
     }
 
