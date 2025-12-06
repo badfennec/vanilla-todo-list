@@ -28,7 +28,7 @@ export default class TodoItem {
     deleteIcon = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 5.29297C17.6835 4.90244 18.3165 4.90244 18.707 5.29297C19.0974 5.68351 19.0975 6.31656 18.707 6.70703L13.4141 12L18.707 17.293C19.0974 17.6835 19.0975 18.3166 18.707 18.707C18.3166 19.0975 17.6835 19.0974 17.293 18.707L12 13.4141L6.70703 18.707C6.31656 19.0975 5.68351 19.0974 5.29297 18.707C4.90244 18.3165 4.90244 17.6835 5.29297 17.293L10.5859 12L5.29297 6.70703C4.90244 6.31651 4.90244 5.68349 5.29297 5.29297C5.68349 4.90244 6.31651 4.90244 6.70703 5.29297L12 10.5859L17.293 5.29297Z" fill="currentColor"/></svg>';
 
     constructor( args ) {
-        const { ToDo, item, count, onDragStart, onDragMove, onDragEnd, onUpdate, onDelete } = args;
+        const { ToDo, item, key, onDragStart, onDragMove, onDragEnd, onUpdate, onDelete } = args;
         this.ToDo = ToDo;
         this.item = item;
 
@@ -39,13 +39,13 @@ export default class TodoItem {
         this.onUpdate = onUpdate;
         this.onDelete = onDelete;
 
-        this.#setup( this.item, count );
+        this.#setup( this.item, key );
 
         new DragEvents({ ToDo: this.ToDo, item: this, onDragStartCallback: onDragStart, onDragMoveCallback: onDragMove, onDragEndCallback: onDragEnd });
     }
 
-    #setup( item, count ){
-        this.key = count;
+    #setup( item, key ){
+        this.key = key;
         this.entry = document.createElement('div');
         this.entry.className = 'badfennec-todo__item';
         this.completed = item.completed || false;
@@ -195,7 +195,7 @@ export default class TodoItem {
 
     #onUpdateChange(){
         this.checkbox.innerHTML = this.completed ? this.checkedIcon : this.uncheckedIcon;
-        this.entry.classList.toggle('badfennec-todo__item--completed', this.completed);
+        this.entry.classList.toggle('badfennec-todo__item--completed', this.completed );
     }
 
 }

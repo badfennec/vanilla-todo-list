@@ -4,6 +4,7 @@ import TodoItem from './todo-item.js';
 import Sorting from './sort.js';
 import DragIntersector from './drag-intersector.js';
 import Events from './events.js';
+import DOMHandler from './dom.js';
 
 import './badfennec-todo.css';
 
@@ -45,7 +46,7 @@ export default class BadFennecTodo {
         this.#setup(items);
     }
 
-    #setup(items) {
+    #setup( items ) {
 
         this.el.classList.add('badfennec-todo');
 
@@ -81,11 +82,11 @@ export default class BadFennecTodo {
         this.dragIntersector = new DragIntersector(this);
     }
 
-    #addItem(item) {
+    #addItem( item ) {
         item = new TodoItem({ 
             ToDo: this, 
             item, 
-            count: this.count,
+            key: this.count,
             onDragStart: ( item ) => {
                 this.#onDragStart( item );
             },
@@ -109,20 +110,9 @@ export default class BadFennecTodo {
     }
 
     #addContainers(){
-        this.#addNotCompletedContainer();
-        this.#addCompletedContainer();
-    }
-
-    #addNotCompletedContainer(){
-        this.notCompletedContainer = document.createElement('div');
-        this.notCompletedContainer.className = 'badfennec-todo__not-completed-container';
-        this.el.appendChild( this.notCompletedContainer );
-    }
-
-    #addCompletedContainer(){
-        this.completedContainer = document.createElement('div');
-        this.completedContainer.className = 'badfennec-todo__completed-container';
-        this.el.appendChild( this.completedContainer );
+        const domHandler = new DOMHandler();
+        this.notCompletedContainer = domHandler.addNotCompletedContainer(this.el);
+        this.completedContainer = domHandler.addCompletedContainer(this.el);
     }
 
     on( event, callback ) {
