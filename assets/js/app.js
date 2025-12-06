@@ -3,9 +3,13 @@ import Todo from '../../badfennec-todo/badfennec-todo.js';
 document.addEventListener('DOMContentLoaded', function() {
 
     const items = [
+        { text: 'Write documentation Write documentation Write documentation Write documentation Write documentation', completed: false },
         { text: 'Learn JavaScript', completed: false },
         { text: 'Build a Todo App', completed: false },
-        { text: 'Write documentation Write documentation Write documentation Write documentation Write documentation', completed: false },
+        { text: 'Build a Todo App', completed: false },
+        { text: 'Build a Todo App', completed: false },
+        { text: 'Build a Todo App', completed: false },
+        { text: 'Build a Todo App', completed: false },        
         { text: 'Profit!', completed: false },
         { text: 'Review code', completed: true },
         { text: 'Deploy application', completed: false },

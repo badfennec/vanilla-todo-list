@@ -24,6 +24,7 @@
     .badfennec-todo__item {      
         
         margin-bottom: 10px;
+        background-color: red;
         
         .badfennec-todo__item-container {
             display: flex;
@@ -40,14 +41,23 @@
         &.badfennec-todo__item--dragging {
 
             z-index: 1000;
+            background-color: transparent;
 
             .badfennec-todo__item-container {
+                opacity: .8;
                 box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            }
+        }
+
+        &.badfennec-todo__item--intersected {
+            .badfennec-todo__item-container {
+                background-color: orange;
             }
         }
 
         &.badfennec-todo__item--placeholder {
             margin-bottom: 0;
+            background-color: purple;
             /* opacity: 0;
             transition: height .5s ease; */
         }

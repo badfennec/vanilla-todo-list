@@ -5,6 +5,9 @@ export default class DragPhysics {
     // Initial difference between mouse Y and element top
     startYDiff = 0;
 
+    startY = 0;
+    currentY = 0;
+
     constructor({ element, item, grabber, container, onStart, onMove, onEnd }) {
 
         this.element = element;
@@ -50,9 +53,11 @@ export default class DragPhysics {
         }
 
         this.isDragging = true;
+        this.startY = this.#getY(e);
+        this.currentY = this.startY;
 
         // Initial Y position inside the container
-        this.startYDiff = this.#getY(e) - this.element.getBoundingClientRect().top;
+        this.startYDiff = this.startY - this.element.getBoundingClientRect().top;        
 
         if (this.onStartCallback){ 
             this.onStartCallback();        
@@ -76,14 +81,14 @@ export default class DragPhysics {
         if (e.cancelable) 
             e.preventDefault();
 
-        const currentY = this.#getY(e);
-        const deltaY = currentY - this.startYDiff;
+        this.currentY = this.#getY(e);
+        const deltaY = this.currentY - this.startYDiff;
         
         // Update visual position
-        this.element.style.top = `${deltaY}px`;
+        this.element.style.transform = `translate3d(0, ${-(this.startY - this.currentY)}px, 0)`;
         
         if (this.onMoveCallback){ 
-            this.onMoveCallback(e, deltaY);
+            this.onMoveCallback(e, this.currentY);
         }
     }
 
@@ -92,7 +97,6 @@ export default class DragPhysics {
      */
     #end(e) {
         this.isDragging = false;
-        this.startYDiff = 0;
         
         // Remove event listeners
         window.removeEventListener('mousemove', this.moveHandler);
@@ -102,7 +106,10 @@ export default class DragPhysics {
 
         // Notify end of dragging
         if (this.onEndCallback){ 
-            this.onEndCallback(this.element.getBoundingClientRect().top);
+            const itemFinalY = this.currentY - this.startYDiff;
+            this.onEndCallback( itemFinalY );
         }
+
+        this.startYDiff = 0;
     }
 }

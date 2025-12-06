@@ -18,7 +18,13 @@ export default class TodoItem {
     fullHeight = 0;
     marginBottom = 0;
 
-    startY = 0;   
+    startY = 0; 
+    rect = {
+        top: 0,
+        bottom: 0,
+        height: 0,
+        middleHeight: 0
+    }  
     
     spaceAvailable = null;
     spaceAvailableHeight = 0;
@@ -62,10 +68,17 @@ export default class TodoItem {
         this.#addItemText();
         this.#addItemDelete();
 
-        this.ToDo.notCompletedContainer.appendChild( this.entry );
-        this.setHeight();
+        if( !this.completed ){
+            this.ToDo.notCompletedContainer.appendChild( this.entry );
+        } else {
+            this.ToDo.completedContainer.appendChild( this.entry );
+        }
+        
 
-        this.setStartY();
+        this.setRect();
+        this.setStartY( this.rect.top );
+        this.setHeight( this.rect.height );
+        
         this.#addReactive();
         
     }
@@ -87,14 +100,29 @@ export default class TodoItem {
         this.index = index;
     }
 
-    setStartY(){
-        this.startY = this.entry.getBoundingClientRect().top;
+    setStartY( top ){
+        this.startY = top || this.entry.getBoundingClientRect().top;
+
+        if( !top )
+            console.log('getBoundingClientRect() called');
     }
 
-    setHeight(){
+    setRect(){
+        console.log('getBoundingClientRect() called');
+        const rect = this.container.getBoundingClientRect();
+        this.rect.top = rect.top;
+        this.rect.bottom = rect.bottom;
+        this.rect.height = rect.height;
+        this.rect.middleHeight = rect.height / 2;
+    }
+
+    setHeight( height ){
         this.marginBottom = parseFloat(window.getComputedStyle(this.entry).marginBottom);
-        this.height = this.container.getBoundingClientRect().height ;
+        this.height = height || this.container.getBoundingClientRect().height ;
         this.fullHeight = this.height + this.marginBottom;
+
+        if( !height )
+            console.log('getBoundingClientRect() called');
     }
 
     setSpaceAvailable({position, height}){

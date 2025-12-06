@@ -73,6 +73,7 @@ export default class DragEvents {
         entry.style.top = ``;
         entry.style.left = ``;
         entry.style.width = ``;
+        entry.style.transform = `translate3d(0, 0, 0)`;
 
         this.ToDo.el.style.cursor = '';
 

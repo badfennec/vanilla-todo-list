@@ -57,7 +57,6 @@ export default class BadFennecTodo {
         });
 
         this.#addIntersector();
-        this.#completedHandler();
         this.#addReactivity();
     }
 
@@ -89,18 +88,21 @@ export default class BadFennecTodo {
             key: this.count,
             onDragStart: ( item ) => {
                 this.#onDragStart( item );
+                this.dragIntersector.reset();
             },
             onDragMove: ( deltaY ) => {
                 this.#onDragMove( deltaY );
             },
-            onDragEnd: ( finalY ) => {
-                this.#onDragEnd( finalY );
+            onDragEnd: ( itemFinalY ) => {
+                this.#onDragEnd( itemFinalY );
+                this.dragIntersector.reset();
             },
             onUpdate: ( item ) => {
                 this.#onItemToggle( item );
             },
             onDelete: ( item ) => {
                 this.#onDelete(item);
+                this.dragIntersector.reset();
             }
         });
 
@@ -127,17 +129,17 @@ export default class BadFennecTodo {
         this.draggingItem = item;
 
         //Add placeholder at original position to not collapse list
-        this.dragIntersector.addPlaceholder({ element: this.draggingItem.entry });
+        this.dragIntersector.dragStart();
     }
 
     #onDragMove( deltaY ){
         this.#onDeltaChange( deltaY );
     }
 
-    #onDragEnd( finalY ) {
+    #onDragEnd( itemFinalY ) {
         const sorting = new Sorting({ ToDo: this });
 
-        const insert = this.dragIntersector.afterDrag( finalY );
+        const insert = this.dragIntersector.afterDrag( itemFinalY );
 
         if( insert ){
             sorting.startResort();
@@ -213,7 +215,7 @@ export default class BadFennecTodo {
                         this.notCompletedContainer.insertBefore( item.entry, nextItem.entry );
                     }
                 }
-            }            
+            }
 
             item.setStartY();
         });
