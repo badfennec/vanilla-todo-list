@@ -1,22 +1,22 @@
 export default class Reactive {
     value = null;
-    suscribers = [];
+    subscribers = [];
 
     constructor( initialValue) {
         this.value = initialValue;
     }
 
     subscribe( fn ){
-        this.suscribers.push( fn );
+        this.subscribers.push( fn );
         fn( this.value );
     }
 
     next( newValue ){
         this.value = {  ...this.value, ...newValue };
-        this.notyfy();
+        this.notify();
     }
 
-    notyfy(){
-        this.suscribers.forEach( fn => fn( this.value ) );
+    notify(){
+        this.subscribers.forEach( fn => fn( this.value ) );
     }
 }

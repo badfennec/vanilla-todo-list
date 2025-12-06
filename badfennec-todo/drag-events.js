@@ -45,7 +45,6 @@ export default class DragEvents {
         entry.style.top = `${entryRect.top}px`;
         entry.style.left = `${entryRect.left}px`;
         entry.style.width = `${entryRect.width}px`;
-        entry.style.zIndex = 1000;
 
         this.ToDo.el.style.cursor = 'grabbing';
 
@@ -74,7 +73,6 @@ export default class DragEvents {
         entry.style.top = ``;
         entry.style.left = ``;
         entry.style.width = ``;
-        entry.style.zIndex = ``;
 
         this.ToDo.el.style.cursor = '';
 

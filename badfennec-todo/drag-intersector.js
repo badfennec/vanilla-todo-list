@@ -33,7 +33,7 @@ export default class DragIntersector {
         const entryRect = entry.getBoundingClientRect();
 
         //middle Y of dragged item
-        const entryMiddleY = this.ToDo.dragY + ( entryRect.height / 2 );
+        const entryMiddleY = this.ToDo.dragY + ( this.ToDo.draggingItem.getHeight() / 2 );
 
         const lastIntersectedItem = this.ToDo.items.find( item => {
 
@@ -42,9 +42,11 @@ export default class DragIntersector {
                 return false;
             }
 
+            const itemRect = item.entry.getBoundingClientRect();            
+
             //check if item intersects with dragged item
-            return item.entry.getBoundingClientRect().top < entryRect.bottom &&
-                item.entry.getBoundingClientRect().bottom > entryMiddleY;
+            return itemRect.top < entryRect.bottom &&
+                itemRect.bottom > entryMiddleY;
         });
 
         //manage intersection visual feedback

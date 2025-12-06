@@ -94,13 +94,13 @@ export default class DragPhysics {
         this.isDragging = false;
         this.startYDiff = 0;
         
-        // Pulizia listener globali
+        // Remove event listeners
         window.removeEventListener('mousemove', this.moveHandler);
         window.removeEventListener('touchmove', this.moveHandler);
         window.removeEventListener('mouseup', this.endHandler);
         window.removeEventListener('touchend', this.endHandler);
 
-        // Notifica fine
+        // Notify end of dragging
         if (this.onEndCallback){ 
             this.onEndCallback(this.element.getBoundingClientRect().top);
         }
