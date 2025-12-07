@@ -112,4 +112,9 @@ export default class DragPhysics {
 
         this.startYDiff = 0;
     }
+
+    destroy(){
+        this.grabber.removeEventListener('mousedown', this.startHandler);
+        this.grabber.removeEventListener('touchstart', this.startHandler);
+    }
 }

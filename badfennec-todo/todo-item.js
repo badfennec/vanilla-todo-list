@@ -49,7 +49,7 @@ export default class TodoItem {
 
         this.#setup( this.item, key );
 
-        new DragEvents({ ToDo: this.ToDo, item: this, onDragStartCallback: onDragStart, onDragMoveCallback: onDragMove, onDragEndCallback: onDragEnd });
+        this.dragEvents = new DragEvents({ ToDo: this.ToDo, item: this, onDragStartCallback: onDragStart, onDragMoveCallback: onDragMove, onDragEndCallback: onDragEnd } );
     }
 
     #setup( item, key ){
@@ -102,13 +102,9 @@ export default class TodoItem {
 
     setStartY( top ){
         this.startY = top || this.entry.getBoundingClientRect().top;
-
-        if( !top )
-            console.log('getBoundingClientRect() called');
     }
 
     setRect(){
-        console.log('getBoundingClientRect() called');
         const rect = this.container.getBoundingClientRect();
         this.rect.top = rect.top;
         this.rect.bottom = rect.bottom;
@@ -120,9 +116,6 @@ export default class TodoItem {
         this.marginBottom = parseFloat(window.getComputedStyle(this.entry).marginBottom);
         this.height = height || this.container.getBoundingClientRect().height ;
         this.fullHeight = this.height + this.marginBottom;
-
-        if( !height )
-            console.log('getBoundingClientRect() called');
     }
 
     setSpaceAvailable({position, height}){
@@ -217,15 +210,20 @@ export default class TodoItem {
         this.container.appendChild(button);
 
         deleteBtn.addEventListener('click', () => {
-            //remove all event listeners to avoid memory leaks
-            this.entry.remove();
-            this.onDelete( this );
+            this.destroy();            
         });
     }
 
     #onUpdateChange(){
         this.checkbox.innerHTML = this.completed ? this.checkedIcon : this.uncheckedIcon;
         this.entry.classList.toggle('badfennec-todo__item--completed', this.completed );
+    }
+
+    destroy(){
+        //remove all event listeners to avoid memory leaks
+        this.entry.remove();
+        this.onDelete( this );
+        this.dragEvents.destroy();
     }
 
 }

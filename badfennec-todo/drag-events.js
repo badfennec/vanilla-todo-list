@@ -2,6 +2,8 @@ import DragPhysics from './drag-physics.js';
 
 export default class DragEvents {
 
+    DragPhysics = null;
+
     constructor({ ToDo, item, onDragStartCallback, onDragMoveCallback, onDragEndCallback }) {
         this.ToDo = ToDo;
         this.item = item;
@@ -15,7 +17,7 @@ export default class DragEvents {
     #addItemDragEvents(){
         const {entry, grabber} = this.item;
 
-        new DragPhysics({
+        this.DragPhysics = new DragPhysics({
             grabber: grabber,
             item: this.item,
             element: entry,
@@ -86,6 +88,10 @@ export default class DragEvents {
         if( this.onDragEndCallback ){
             this.onDragEndCallback( finalY );
         }
+    }
+
+    destroy(){
+        this.DragPhysics.destroy();
     }
 
 }

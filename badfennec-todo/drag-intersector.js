@@ -1,6 +1,8 @@
 export default class DragIntersector {
 
     placeholder = null;
+    placeholderActive = false;
+
     isOverWindow = false;
     lastIntersectedItem = null;
     windowLimits = { top: 0, bottom: 0 };
@@ -8,71 +10,83 @@ export default class DragIntersector {
     
     constructor( ToDo ) {
         this.ToDo = ToDo;
-
-        this.setWindowLimits(); 
-        this.setItemsRect();
     }
 
+    /**
+     * Sets the rectangles of all items in the todo list, adjusting for the dragged item.
+     * This avoids recalculating each item's rectangle individually during drag operations.
+     */
     setItemsRect(){
 
+        let items = [...this.ToDo.items].filter( item => !item.completed );
+
         this.itemsRect.splice(0, this.itemsRect.length);
-        let count = 0;
         let offset = this.windowLimits.top;
 
         if( !this.ToDo.draggingItem ) {
             return;
         }
-        
-        const draggedItemHeight = this.ToDo.draggingItem.getHeight();
 
-        this.ToDo.items.forEach( item => {
-            if( !item.completed && item != this.ToDo.draggingItem ){
-                count++;
-                const height = item.getHeight();
-                const top = offset;
-                const bottom = offset + height;
-                offset += height;
+        items.forEach( item => {
+
+            //add placeholder height if needed
+            if( item.key === this.ToDo.draggingItem.key ){
+                if( this.placeholderActive ){
+                    offset += this.ToDo.draggingItem.getFullHeight();
+                }                
+            } else {
+                //Height of the dragged item
+                const draggedItemHeight = this.ToDo.draggingItem.getHeight();
+                const hasSpaceAvailable = item.spaceAvailable;
+
+                //calculate item rect considering space available for dragged item
+                const itemHeight = item.getHeight();
+                const height = itemHeight;
+
+                //top and bottom are only for the content, margin or padding is not included
+
+                //calculate top position considering space available for dragged item
+                const top = offset + ( ( hasSpaceAvailable === 'top' ) ? draggedItemHeight : 0 );
+
+                //consider space available for dragged item
+                const bottom = top + height;
+
+                //update offset for next item
+                offset = bottom + item.getMarginBottom() + ( ( hasSpaceAvailable === 'bottom' ) ? draggedItemHeight : 0 );
 
                 this.itemsRect.push( {
                     key: item.key,
                     height: height,
                     top,
-                    bottom
+                    bottom,
+                    entry: item.entry
                 } );
-                
+
             }
+
         });
 
-        console.log( this.itemsRect );
-
-        console.log('items rect set for ', count, ' items');
+        if( this.itemsRect.length > 0 ){
+            //set bottom limit for window
+            this.setWindowLimits({ top: this.windowLimits.top, bottom: offset });
+        }
     }
 
-    reset(){
-        //this.setWindowLimits();
-        //this.setItemsRect();
-    }
+    setWindowLimits( {top, bottom} = {} ){
 
-    setWindowLimits(){
-        console.log('setting window limits');
-        const containerRect = this.ToDo.notCompletedContainer.getBoundingClientRect();
-        this.windowLimits.top = containerRect.top;
-        this.windowLimits.bottom = containerRect.bottom;
+        let containerRect = ( !top || !bottom ) ? this.ToDo.notCompletedContainer.getBoundingClientRect() : {};
+        
+        this.windowLimits.top = top || containerRect.top;
+        this.windowLimits.bottom = bottom || containerRect.bottom;
     }
-
-    /* setItemsRect(){
-        this.ToDo.items.forEach( item => {
-            if( !item.completed && item != this.ToDo.draggingItem ){
-                item.setRect();
-            }
-        });
-    } */
 
     checkIntersections(){
 
         if( !this.ToDo.draggingItem ) {     
             return;
         }
+
+        this.setItemsRect();
 
         const isOverWindow = this.checkOverWindow();
 
@@ -92,7 +106,7 @@ export default class DragIntersector {
         });
 
         //manage intersection visual feedback
-        if( lastIntersectedItem ) {
+        if( lastIntersectedItem ){
 
             this.lastIntersectedItem = this.ToDo.items.find( item => item.key === lastIntersectedItem.key );
 
@@ -100,11 +114,11 @@ export default class DragIntersector {
                 return;
             }
 
-            console.log( console.log('lastIntersectedItem:', this.lastIntersectedItem.entry ) );
-
             //reset placeholder first to avoid doble padding
             this.resetPlaceholder();
+            this.setItemsRect();
             this.onIntersection();
+            //this.setItemsRect();
         } else {
             return;
         }
@@ -128,28 +142,11 @@ export default class DragIntersector {
         //handle the return from over window
         if( this.lastIntersectedItem.spaceAvailable ){
 
-            console.log('has space available');
-            //this.lastIntersectedItem.setStartY();
-            
-            /* if( (this.lastIntersectedItem.spaceAvailable === 'top' && delta > 0) &&
-                ( this.ToDo.dragY < this.lastIntersectedItem.startY + this.lastIntersectedItem.spaceAvailableHeight / 2 ) ){
-                    console.log('return from top');
-                return
-            }
-            
-            if( (this.lastIntersectedItem.spaceAvailable === 'bottom' && delta < 0) &&
-                ( this.ToDo.dragY > this.lastIntersectedItem.startY + this.lastIntersectedItem.getHeight() / 2 ) ){
-                    console.log('return from bottom');
-                return
-            } */
-
             if( (this.lastIntersectedItem.spaceAvailable === 'top' && delta > 0) && ( this.ToDo.dragY < this.lastIntersectedItem.rect.top ) ){
-                    console.log('return from top');
                 return
             }
             
             if( (this.lastIntersectedItem.spaceAvailable === 'bottom' && delta < 0 ) && ( this.ToDo.dragY > this.lastIntersectedItem.rect.bottom ) ){
-                    console.log('return from bottom');
                 return
             } 
         }
@@ -160,8 +157,14 @@ export default class DragIntersector {
 
         if( this.lastIntersectedItem.spaceAvailable !== position ){
             this.lastIntersectedItem.setSpaceAvailable({position, height});
-            //this.setItemsRect();
-        }        
+        } 
+        
+        this.ToDo.items.forEach( item => {
+            if( item !== this.lastIntersectedItem ) {
+                this.onIntersectionReset( item );
+            }
+        });
+        //this.setItemsRect();
     }
 
     //called to reset visual state of item after intersection
@@ -171,6 +174,7 @@ export default class DragIntersector {
             return;
 
         item.resetSpaceAvailable();
+        //this.setItemsRect();
     }
 
     /**
@@ -203,9 +207,12 @@ export default class DragIntersector {
         } else {
             this.ToDo.notCompletedContainer.insertBefore( this.placeholder, element.nextSibling );
         }
+
+        this.placeholderActive = true;
     }
 
     resetPlaceholder(){
+        this.placeholderActive = false;
         if( this.placeholder ) {
             this.placeholder.style.paddingTop = `0px`;
         }
@@ -242,8 +249,6 @@ export default class DragIntersector {
             this.isOverWindow = v;
 
             let targetElement = null;
-
-            this.reset();
 
             if( v === -1 ) {
                 targetElement = this.ToDo.items.find( item => !item.completed && item !== this.ToDo.draggingItem );
@@ -292,15 +297,22 @@ export default class DragIntersector {
                 this.ToDo.notCompletedContainer.insertBefore( this.ToDo.draggingItem.entry, this.lastIntersectedItem.entry.nextSibling );
             }
 
-            this.onIntersectionReset( this.lastIntersectedItem );
+            this.ToDo.items.forEach( item => {
+                item.resetSpaceAvailable();
+            });
 
             return true;
         }
+
+        this.ToDo.items.forEach( item => {
+            item.resetSpaceAvailable();
+        });
 
         return false;
     }
 
     dragStart(){
+        this.setWindowLimits();
         this.addPlaceholder({ element: this.ToDo.draggingItem.entry });
         this.setItemsRect();
     }
