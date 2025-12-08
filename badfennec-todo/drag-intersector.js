@@ -52,7 +52,7 @@ export default class DragIntersector {
                 const bottom = top + height;
 
                 //update offset for next item
-                offset = bottom + item.getMarginBottom() + ( ( hasSpaceAvailable === 'bottom' ) ? draggedItemHeight : 0 );
+                offset = bottom + item.getGap() + ( ( hasSpaceAvailable === 'bottom' ) ? draggedItemHeight : 0 );
 
                 this.itemsRect.push( {
                     key: item.key,

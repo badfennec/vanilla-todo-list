@@ -14,6 +14,8 @@ export default class TodoItem {
     entryText = null;
     deleteBtn = null;
 
+    gap = 0;
+
     height = 0;
     fullHeight = 0;
     marginBottom = 0;
@@ -35,9 +37,27 @@ export default class TodoItem {
     deleteIcon = null;
 
     constructor( args ) {
-        const { ToDo, item, key, onDragStart, onDragMove, onDragEnd, onUpdate, onDelete } = args;
+        const { 
+            ToDo, 
+            item, 
+            key, 
+            gap,
+
+            completedContainer, 
+            notCompletedContainer,
+
+            onDragStart, 
+            onDragMove, 
+            onDragEnd, 
+            onUpdate, 
+            onDelete,            
+        } = args;
+
         this.ToDo = ToDo;
         this.item = item;
+
+        this.completedContainer = completedContainer;
+        this.notCompletedContainer = notCompletedContainer;
 
         this.grabIcon = args.grabIcon || GrabIcon;
         this.checkedIcon = args.checkedIcon || CheckedIcon;
@@ -46,6 +66,8 @@ export default class TodoItem {
 
         this.onUpdate = onUpdate;
         this.onDelete = onDelete;
+
+        this.gap = gap || 0;
 
         this.#setup( this.item, key );
 
@@ -62,6 +84,7 @@ export default class TodoItem {
         this.container = document.createElement('div');
         this.container.className = 'badfennec-todo__item-container';
         this.entry.appendChild(this.container);
+        this.entry.style.marginBottom = `${this.gap}px`;
 
         this.#addItemGrabber(); 
         this.#addItemCheckbox();
@@ -69,9 +92,9 @@ export default class TodoItem {
         this.#addItemDelete();
 
         if( !this.completed ){
-            this.ToDo.notCompletedContainer.appendChild( this.entry );
+            this.notCompletedContainer.appendChild( this.entry );
         } else {
-            this.ToDo.completedContainer.appendChild( this.entry );
+            this.completedContainer.appendChild( this.entry );
         }
         
 
@@ -113,9 +136,8 @@ export default class TodoItem {
     }
 
     setHeight( height ){
-        this.marginBottom = parseFloat(window.getComputedStyle(this.entry).marginBottom);
         this.height = height || this.container.getBoundingClientRect().height ;
-        this.fullHeight = this.height + this.marginBottom;
+        this.fullHeight = this.height + this.getGap();
     }
 
     setSpaceAvailable({position, height}){
@@ -137,8 +159,8 @@ export default class TodoItem {
         this.entry.style.paddingBottom = `0px`;
     }
 
-    getMarginBottom(){
-        return this.marginBottom;
+    getGap(){
+        return this.gap;
     }
 
     getHeight(){

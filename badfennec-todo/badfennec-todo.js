@@ -29,9 +29,18 @@ export default class BadFennecTodo {
     notCompletedContainer = null;
     completedContainer = null;
 
-    events = new Events();        
+    itemsGap = 10;
 
-    constructor({ el, items = [] }) {
+    events = new Events();
+
+    icons = {
+        itemCheckedIcon: null,
+        itemUncheckedIcon: null,
+        itemGrabIcon: null,
+        itemDeleteIcon: null,
+    }
+
+    constructor({ el, items = [], itemsGap, icons = {} }) {
         
         if(!el) {
             throw new Error('Element not provided for Todo app');
@@ -43,10 +52,16 @@ export default class BadFennecTodo {
             this.el = el;
         }
 
-        this.#setup(items);
+        this.#setup({items, itemsGap, icons});
     }
 
-    #setup( items ) {
+    #setup( {items, itemsGap, icons} ) {
+
+        if( itemsGap !== undefined ) {
+            this.itemsGap = itemsGap;
+        }
+
+        this.#setIcons( icons );
 
         this.el.classList.add('badfennec-todo');
 
@@ -86,6 +101,16 @@ export default class BadFennecTodo {
             ToDo: this, 
             item, 
             key: this.count,
+            gap: this.itemsGap,
+
+            completedContainer: this.completedContainer,
+            notCompletedContainer: this.notCompletedContainer,
+
+            checkedIcon: this.icons.itemCheckedIcon,
+            uncheckedIcon: this.icons.itemUncheckedIcon,
+            grabIcon: this.icons.itemGrabIcon,
+            deleteIcon: this.icons.itemDeleteIcon,
+
             onDragStart: ( item ) => {
                 this.#onDragStart( item );
             },
@@ -107,6 +132,13 @@ export default class BadFennecTodo {
         this.count++;
 
         return item;
+    }
+
+    #setIcons( icons ){
+        this.icons.itemCheckedIcon = icons.itemCheckedIcon || null;
+        this.icons.itemUncheckedIcon = icons.itemUncheckedIcon || null;
+        this.icons.itemGrabIcon = icons.itemGrabIcon || null;
+        this.icons.itemDeleteIcon = icons.itemDeleteIcon || null;
     }
 
     #addContainers(){
