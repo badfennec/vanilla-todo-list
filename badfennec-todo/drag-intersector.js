@@ -23,9 +23,9 @@ export default class DragIntersector {
         this.itemsRect.splice(0, this.itemsRect.length);
         let offset = this.windowLimits.top;
 
-        if( !this.ToDo.draggingItem ) {
+        /* if( !this.ToDo.draggingItem ) {
             return;
-        }
+        } */
 
         items.forEach( item => {
 
@@ -226,13 +226,13 @@ export default class DragIntersector {
     }
 
     checkOverWindow(){
-        const overTop = this.ToDo.dragY < this.windowLimits.top - this.ToDo.draggingItem.getHeight();
+        const overTop = this.ToDo.dragY < this.windowLimits.top;
 
         if( overTop ){
             return -1;
         }
 
-        const overBottom = this.ToDo.dragY > this.windowLimits.bottom - this.ToDo.draggingItem.getHeight();
+        const overBottom = this.ToDo.dragY > this.windowLimits.bottom;
 
         if( overBottom ){
             return 1;
@@ -281,6 +281,8 @@ export default class DragIntersector {
     }
 
     afterDrag( itemFinalY ) {
+
+        console.log(this.itemsRect);
 
         //remove also margin placeholder
         this.removePlaceholder();

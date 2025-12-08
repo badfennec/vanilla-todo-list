@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const todoApp = new Todo({
         el: document.getElementById('todo'), // or you can use a selector string like '#todo'
         items: items,
-        itemsGap: 25,
+        //itemsGap: 25,
         icons: {
             /* itemCheckedIcon: '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="none" stroke="currentColor" stroke-width="3" d="M2,12 L9,19 L22,4"/></svg>',
             itemUncheckedIcon: '<svg viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="3" fill="none"/></svg>',
