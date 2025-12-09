@@ -27,6 +27,7 @@ export default class BadFennecTodo {
     dragIntersector = null;
 
     notCompletedContainer = null;
+    addNewItemBox = null;
     completedContainer = null;
 
     itemsGap = 10;
@@ -38,6 +39,7 @@ export default class BadFennecTodo {
         itemUncheckedIcon: null,
         itemGrabIcon: null,
         itemDeleteIcon: null,
+        addIcon: null,
     }
 
     constructor({ el, items = [], itemsGap, icons = {} }) {
@@ -139,11 +141,23 @@ export default class BadFennecTodo {
         this.icons.itemUncheckedIcon = icons.itemUncheckedIcon || null;
         this.icons.itemGrabIcon = icons.itemGrabIcon || null;
         this.icons.itemDeleteIcon = icons.itemDeleteIcon || null;
+        this.icons.addIcon = icons.addIcon || null;
     }
 
     #addContainers(){
         const domHandler = new DOMHandler();
+
         this.notCompletedContainer = domHandler.addNotCompletedContainer(this.el);
+
+        this.addNewItemBox = domHandler.addNewItemBox({
+            parent: this.el, 
+            icon: this.icons.addIcon, 
+            placeholder: 'Add new item',
+            addCallback: () => {
+                this.items.push(this.#addItem({ text: '', completed: false }));
+            }
+        });
+
         this.completedContainer = domHandler.addCompletedContainer(this.el);
     }
 

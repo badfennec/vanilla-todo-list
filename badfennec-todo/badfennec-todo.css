@@ -5,12 +5,6 @@
     grid-template-columns: 1fr;
     padding: 20px;
 
-    .badfennec-todo__not-completed-container, .badfennec-todo__completed-container {
-        /* display: grid;
-        grid-template-columns: 1fr;
-        gap: 10px; */
-    }
-
     &.badfennec-todo--dragging {
         -webkit-user-select: none;
         -ms-user-select: none;
@@ -21,16 +15,44 @@
         }
     }
 
-    .badfennec-todo__item {      
-        
-        //margin-bottom: 10px;
-        //background-color: red;
-        
-        .badfennec-todo__item-container {
+    .badfennec-todo__shape {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        aspect-ratio: 1 / 1;
+        width: 18px;
+
+        svg, img {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+    }/* .badfennec-todo__shape */
+
+    .badfennec-todo__item, .badfennec-todo__add-new-item-box {
+        .badfennec-todo__item-container, .badfennec-todo__add-new-item-container {
             display: flex;
             align-items: flex-start;
             gap: 10px;
-            padding: 10px;
+            padding-inline: 10px;
+        }
+    }
+
+    .badfennec-todo__add-new-item-box {
+        .badfennec-todo__add-new-item-container {
+            &:before {
+                content: '';
+                width: 18px;
+            }
+        }
+    }
+
+    .badfennec-todo__item {  
+        
+        .badfennec-todo__item-container {
+            
+            padding-block: 10px;            
             background-color: #fff;
             border: 1px solid #ddd;
             border-radius: 5px;
@@ -55,13 +77,6 @@
             }
         }
 
-        &.badfennec-todo__item--placeholder {
-            margin-bottom: 0;
-            //background-color: purple;
-            /* opacity: 0;
-            transition: height .5s ease; */
-        }
-
         &.badfennec-todo__item--completed {
             color: #888;
 
@@ -69,20 +84,5 @@
                 text-decoration: line-through;
             }
         }
-
-        .badfennec-todo__shape {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            aspect-ratio: 1 / 1;
-            width: 18px;
-
-            svg {
-                display: block;
-                width: 100%;
-                height: auto;
-            }
-        }
-    }
+    }/* .badfennec-todo__item */
 }
