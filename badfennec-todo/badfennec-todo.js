@@ -275,7 +275,7 @@ export default class BadFennecTodo {
         });
 
         if( completedCount > 0 ) {
-            this.el.insertBefore( this.completedContainer, this.notCompletedContainer.nextSibling );
+            this.el.insertBefore( this.completedContainer, this.notCompletedContaine );
         } else {
             this.completedContainer.remove();
         }
