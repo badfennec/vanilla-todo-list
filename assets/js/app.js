@@ -25,6 +25,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }); 
 
+    todoApp.on('input', ({ item }) => {
+        console.log('Todo item input changed:', item);
+    });
+
     todoApp.on('update', ({ items }) => {
         console.log('Todo items updated:', items);
     });

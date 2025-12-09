@@ -4,7 +4,12 @@ import { CheckedIcon, UncheckedIcon, DeleteIcon, GrabIcon } from "./icons";
 
 export default class TodoItem {
 
+    text = '';
+    oldText = '';
+
     completed = false;
+    oldCompleted = false;
+
     key = null;
     index = null;
 
@@ -36,6 +41,9 @@ export default class TodoItem {
     grabIcon = null;
     deleteIcon = null;
 
+    inputTimer = null;
+    inputTimerDelay = 300;
+
     constructor( args ) {
         const { 
             ToDo, 
@@ -50,7 +58,8 @@ export default class TodoItem {
             onDragMove, 
             onDragEnd, 
             onUpdate, 
-            onDelete,            
+            onDelete, 
+            onInput,           
         } = args;
 
         this.ToDo = ToDo;
@@ -64,6 +73,7 @@ export default class TodoItem {
         this.uncheckedIcon = args.uncheckedIcon || UncheckedIcon;
         this.deleteIcon = args.deleteIcon || DeleteIcon;
 
+        this.onInput = onInput;
         this.onUpdate = onUpdate;
         this.onDelete = onDelete;
 
@@ -79,7 +89,9 @@ export default class TodoItem {
         this.entry = document.createElement('div');
         this.entry.className = 'badfennec-todo__item';
         this.completed = item.completed || false;
+        this.oldCompleted = this.completed;
         this.text = item.text || '';
+        this.oldText = this.text;
 
         this.container = document.createElement('div');
         this.container.className = 'badfennec-todo__item-container';
@@ -98,12 +110,16 @@ export default class TodoItem {
         }
         
 
-        this.setRect();
-        this.setStartY( this.rect.top );
-        this.setHeight( this.rect.height );
+        this.#dimSetup();
         
         this.#addReactive();
         
+    }
+
+    #dimSetup(){
+        this.setRect();
+        this.setStartY( this.rect.top );
+        this.setHeight( this.rect.height );
     }
 
     #addReactive(){
@@ -113,7 +129,17 @@ export default class TodoItem {
         }); 
 
         const reactivateSubscription = () => {
-            this.#onUpdateChange();
+
+            if( this.oldText !== this.text ){
+                this.oldText = this.text;
+                this.#dimSetup();
+                this.onInput( this );
+            }
+
+            if( this.oldCompleted !== this.completed ){
+                this.oldCompleted = this.completed;
+                this.#onUpdateChange();
+            }
         }
 
         this.reactive.subscribe( reactivateSubscription );
@@ -215,11 +241,33 @@ export default class TodoItem {
 
     #addItemText(){
         this.entryText = document.createElement('div');
+        this.entryText.contentEditable = true;
         this.entryText.style.flexGrow = '1';
+        this.entryText.style.outline = 'none';
         this.entryText.className = 'badfennec-todo__text';
         this.container.appendChild(this.entryText);
         const textNode = document.createTextNode(this.text);
         this.entryText.appendChild(textNode);
+
+        this.entryText.addEventListener('input', () => {
+            this.inputHandler();
+        });
+    }
+
+    inputHandler(){
+
+        if( this.inputTimer ){
+            clearTimeout( this.inputTimer );
+        }
+
+        this.inputTimer = setTimeout(() => {
+            this.text = this.entryText.innerText;
+            this.reactive.next({ 
+                text: this.text 
+            });
+
+        }, this.inputTimerDelay );
+
     }
 
     #addItemDelete(){
@@ -246,6 +294,7 @@ export default class TodoItem {
         this.entry.remove();
         this.onDelete( this );
         this.dragEvents.destroy();
+        this.inputTimer = null;
     }
 
 }

@@ -1,5 +1,6 @@
 export default class Events {
     callbacks = {
+        input: null,
         update: null,
         toggle: null,
         delete: null,
@@ -32,6 +33,13 @@ export default class Events {
         } );
 
         this.callbacks.update({ items });
+    }
+
+    input( {item} ){
+        if( !this.callbacks.input )
+            return;
+
+        this.callbacks.input({ item: this.getPublicItem( item ) });
     }
 
     toggle( {item, items} ){

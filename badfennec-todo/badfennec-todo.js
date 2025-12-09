@@ -122,6 +122,9 @@ export default class BadFennecTodo {
             onDragEnd: ( itemFinalY ) => {
                 this.#onDragEnd( itemFinalY );
             },
+            onInput: ( item ) => {
+                this.#onInputChange( item );
+            },
             onUpdate: ( item ) => {
                 this.#onItemToggle( item );
             },
@@ -216,6 +219,13 @@ export default class BadFennecTodo {
         this.events.delete( { item: {...item}, items: [...this.items] } );
         this.reactive.next({
             event: 'delete'
+        });
+    }
+
+    #onInputChange( item ){
+        this.events.input( { item: {...item} } );
+        this.reactive.next({
+            event: 'input'
         });
     }
 
