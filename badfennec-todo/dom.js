@@ -33,6 +33,7 @@ export default class DOMHandler {
         const button = document.createElement('div');
         button.className = 'badfennec-todo__shape';
         button.innerHTML = icon || addIcon;
+        button.style.cursor = 'pointer';
         iconContainer.appendChild(button);
 
         button.addEventListener('click', ( e ) => {
