@@ -282,8 +282,6 @@ export default class DragIntersector {
 
     afterDrag( itemFinalY ) {
 
-        console.log(this.itemsRect);
-
         //remove also margin placeholder
         this.removePlaceholder();
 
