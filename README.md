@@ -29,7 +29,11 @@ import Todo from 'path/to/file/badfennec-todo.js';
 Initialize the application by creating a new instance. The constructor accepts a configuration object with the following properties:
 
 - **el:** The target container. Accepts either a CSS selector string (e.g., '#todo') or a direct DOM Element.
-- **items:** An array of objects. Each object must contain a text (string) and a completed (boolean) status.
+- **items:** An array of objects containing the following optional parameters:
+    - id
+    - ID
+    - text (string)
+    - completed (bool)
 - **itemsGap:** Gap between an item and other. Default: 10.
 - **icons:** An object with custom icons to use instead of the default ones. Available icons are: itemCheckedIcon, itemUncheckedIcon, itemGrabIcon, itemDeleteIcon and addIcon
 

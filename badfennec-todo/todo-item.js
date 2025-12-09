@@ -11,6 +11,8 @@ export default class TodoItem {
     oldCompleted = false;
 
     key = null;
+    id = null;
+    ID = null;
     index = null;
 
     entry = null;
@@ -84,11 +86,13 @@ export default class TodoItem {
         this.dragEvents = new DragEvents({ ToDo: this.ToDo, item: this, onDragStartCallback: onDragStart, onDragMoveCallback: onDragMove, onDragEndCallback: onDragEnd } );
     }
 
-    #setup( item, key ){
+    #setup( item, key ){        
         this.key = key;
+        this.id = this.ID = item.id || item.ID;        
+
         this.entry = document.createElement('div');
         this.entry.className = 'badfennec-todo__item';
-        this.completed = item.completed || false;
+        this.completed = Boolean(item.completed) || false;
         this.oldCompleted = this.completed;
         this.text = item.text || '';
         this.oldText = this.text;

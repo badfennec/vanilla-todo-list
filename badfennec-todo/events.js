@@ -7,7 +7,12 @@ export default class Events {
     };
 
     getPublicItem( todoItem ){
+
+        const itemID = todoItem.id || todoItem.ID || todoItem.key;
+
         return {
+            id: itemID,
+            ID: itemID,
             text: todoItem.text,
             completed: todoItem.completed
         }
