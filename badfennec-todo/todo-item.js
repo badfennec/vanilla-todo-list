@@ -102,6 +102,7 @@ export default class TodoItem {
         this.#addItemCheckbox();
         this.#addItemText();
         this.#addItemDelete();
+        this.#onUpdateChange();
 
         if( !this.completed ){
             this.notCompletedContainer.appendChild( this.entry );
