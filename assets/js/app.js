@@ -9,8 +9,11 @@ document.addEventListener('DOMContentLoaded', function() {
         { text: 'Write documentation', completed: false }, 
         { text: 'Profit!', completed: false },
         { text: 'Review code', completed: true },
-        { text: 'Deploy application', completed: false }, 
-        
+        { text: 'Deploy application', completed: false },
+        { text: 'Fix bugs', completed: true },
+        { text: 'Refactor codebase', completed: false },
+        { text: 'Optimize performance', completed: false },
+        { text: 'Update dependencies', completed: true }        
     ];
 
     const todoApp = new Todo({
