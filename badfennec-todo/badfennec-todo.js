@@ -6,6 +6,7 @@ import DragIntersector from './drag-intersector.js';
 import Events from './events.js';
 import DOMHandler from './dom.js';
 
+import '@fontsource/poppins';
 import './badfennec-todo.css';
 
 export default class BadFennecTodo {

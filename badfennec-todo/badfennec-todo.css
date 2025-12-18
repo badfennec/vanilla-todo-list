@@ -1,4 +1,8 @@
 .badfennec-todo {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1em;
+    line-height: 1.2em;
+
     background-color: #f9f9f9;
     display: grid;
     gap: 20px;
