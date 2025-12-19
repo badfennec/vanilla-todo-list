@@ -139,18 +139,6 @@ export default class DragIntersector {
 
         delta = delta || this.ToDo.delta;
 
-        //handle the return from over window
-        if( this.lastIntersectedItem.spaceAvailable ){
-
-            if( (this.lastIntersectedItem.spaceAvailable === 'top' && delta > 0) && ( this.ToDo.dragY < this.lastIntersectedItem.rect.top ) ){
-                return
-            }
-            
-            if( (this.lastIntersectedItem.spaceAvailable === 'bottom' && delta < 0 ) && ( this.ToDo.dragY > this.lastIntersectedItem.rect.bottom ) ){
-                return
-            } 
-        }
-
         //adjust padding to show space for dragged item with margin
         const height = this.ToDo.draggingItem.getFullHeight();
         const position = delta < 0 ? 'top' : 'bottom';
