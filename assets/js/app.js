@@ -2,8 +2,6 @@ import Todo from '../../badfennec-todo/badfennec-todo.js';
 
 document.addEventListener('DOMContentLoaded', function() {
 
-    console.log('Initializing Todo App...');
-
     const items = [
         
         { text: 'Learn JavaScript', completed: false },
