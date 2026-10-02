@@ -32,6 +32,13 @@ export interface TodoLabels {
   readonly drag: string;
 }
 
+/** Options after validation: items are complete, icons and labels contain only known keys. */
+export interface ParsedTodoOptions {
+  readonly items: readonly TodoItem[];
+  readonly icons: Partial<TodoIcons>;
+  readonly labels: Partial<TodoLabels>;
+}
+
 /** Options accepted by the list constructor. Every field is optional and falls back to a default. */
 export interface TodoOptions {
   readonly items?: readonly TodoItemInput[];
