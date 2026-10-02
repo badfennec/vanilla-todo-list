@@ -20,7 +20,7 @@ When a step is done:
 | [x]  | 1.3  | `docs/audit.md`                                               | `docs: add codebase audit`                    |
 | [x]  | 1.4  | `docs/architecture.md`, `docs/decisions.md`                   | `docs: add target architecture and decisions` |
 | [x]  | 1.5  | `docs/progress.md` (this file)                                | `docs: add refactor progress tracker`         |
-| [ ]  | 1.6  | `.claude/skills/`: `verify`, `step-done`, `refactor-module`   | `chore: add claude project skills`            |
+| [x]  | 1.6  | `.claude/skills/`: `verify`, `step-done`, `refactor-module`   | `chore: add claude project skills`            |
 
 ## Phase 2 — Tooling
 
