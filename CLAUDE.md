@@ -48,8 +48,9 @@ TypeScript library under `src/` with a redesigned public API.
 ## Code conventions
 
 - TypeScript `strict`. No `any` (use `unknown` + narrowing). No non-null assertions without a comment explaining why.
-- **Zod** validates every public boundary (constructor options, items passed in by consumers). Infer types from schemas
-  (`z.infer`) instead of duplicating them.
+- **Hand-written validators** in `src/lib/model/validation.ts` check every public boundary (constructor options, items
+  passed in by consumers): pure functions from `unknown` to a valid type, throwing a clear `TypeError` otherwise.
+  Types are declared by hand in `src/lib/model/types.ts`. The library has **no runtime dependencies**.
 - Use `#private` fields and methods. Expose only what the public API needs. Prefer `readonly`.
 - One class per file. Filenames are PascalCase for classes (`TodoStore.ts`) and camelCase for modules of functions (`icons.ts`).
 - Every class that adds listeners, timers or DOM exposes `destroy()` and cleans up all of it.
