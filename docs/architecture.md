@@ -33,17 +33,17 @@ The legacy code (`badfennec-todo/`, `assets/js/`) stays untouched as a reference
 
 ## Responsibilities
 
-| Unit                | Owns                                                       | Does NOT                                    |
-| ------------------- | ---------------------------------------------------------- | ------------------------------------------- |
-| `types.ts`          | Shape of the data and of the options                       | Contain logic                               |
-| `validation.ts`     | Runtime checks of public input (`parseOptions`, `parseItem`) | Hold state                                |
-| `TodoStore`         | Ordered items; `add`, `remove`, `toggle`, `edit`, `move`, `setItems`; emits change events | Touch the DOM                |
-| `TypedEmitter`      | Listener registry with typed event map                     | Know about todos                            |
-| `TodoListView`      | Containers, creating/removing/reordering item views from store state, drop placeholder | Decide order or mutate data |
-| `TodoItemView`      | One item's elements, a11y attributes, text input debounce  | Know its siblings or its parent             |
-| `DragController`    | Pointer Events, pointer capture, visual translate of the dragged element | Compute the drop position     |
-| `resolveDropIndex`  | Drop math (pure, unit-tested)                              | Read the DOM                                |
-| `TodoList`          | Validating options, composing the units, public API, `destroy()` | Contain business logic itself         |
+| Unit               | Owns                                                                                      | Does NOT                        |
+| ------------------ | ----------------------------------------------------------------------------------------- | ------------------------------- |
+| `types.ts`         | Shape of the data and of the options                                                      | Contain logic                   |
+| `validation.ts`    | Runtime checks of public input (`parseOptions`, `parseItem`)                              | Hold state                      |
+| `TodoStore`        | Ordered items; `add`, `remove`, `toggle`, `edit`, `move`, `setItems`; emits change events | Touch the DOM                   |
+| `TypedEmitter`     | Listener registry with typed event map                                                    | Know about todos                |
+| `TodoListView`     | Containers, creating/removing/reordering item views from store state, drop placeholder    | Decide order or mutate data     |
+| `TodoItemView`     | One item's elements, a11y attributes, text input debounce                                 | Know its siblings or its parent |
+| `DragController`   | Pointer Events, pointer capture, visual translate of the dragged element                  | Compute the drop position       |
+| `resolveDropIndex` | Drop math (pure, unit-tested)                                                             | Read the DOM                    |
+| `TodoList`         | Validating options, composing the units, public API, `destroy()`                          | Contain business logic itself   |
 
 Rules:
 

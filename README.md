@@ -12,7 +12,6 @@ A lightweight, dependency-free To-Do list built in Vanilla JS. It features a cus
 
 - **Smart Sorting:** Automatically handles reordering between "Active" and "Completed" lists.
 
-
 ## Usage
 
 ```bash
@@ -30,10 +29,10 @@ Initialize the application by creating a new instance. The constructor accepts a
 
 - **el:** The target container. Accepts either a CSS selector string (e.g., '#todo') or a direct DOM Element.
 - **items:** An array of objects containing the following optional parameters:
-    - id
-    - ID
-    - text (string)
-    - completed (bool)
+  - id
+  - ID
+  - text (string)
+  - completed (bool)
 - **itemsGap:** Gap between an item and other. Default: 10.
 - **icons:** An object with custom icons to use instead of the default ones. Available icons are: itemCheckedIcon, itemUncheckedIcon, itemGrabIcon, itemDeleteIcon and addIcon
 
@@ -85,9 +84,9 @@ todoApp.on('delete', ({ item, items }) => {
 });
 ```
 
-| Event Type          | Description                                                                                                                  |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| update                | Fired whenever the list is modified. This includes reordering via drag & drop and status changes (checked/unchecked). The payload contains the new ordered array of items.
-| input                | Fired whene item text change. The payload contains the item.
-| toogle               | Fired when an item is checked or unchecked.
-| delete               | Fired when an item is removed from the list. The payload contains the removed item
+| Event Type | Description                                                                                                                                                                |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| update     | Fired whenever the list is modified. This includes reordering via drag & drop and status changes (checked/unchecked). The payload contains the new ordered array of items. |
+| input      | Fired whene item text change. The payload contains the item.                                                                                                               |
+| toogle     | Fired when an item is checked or unchecked.                                                                                                                                |
+| delete     | Fired when an item is removed from the list. The payload contains the removed item                                                                                         |

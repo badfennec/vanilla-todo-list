@@ -12,23 +12,23 @@ TypeScript library under `src/` with a redesigned public API.
   1. feedback on the changes: files touched, what changed and why, verification results;
   2. a suggested commit message in Conventional Commits style, lowercase and short: `feat: add todo store`.
      Allowed types: `feat`, `fix`, `refactor`, `chore`, `docs`, `test`, `style`.
-  Wait for the user's ok (they commit) before starting the next step.
+     Wait for the user's ok (they commit) before starting the next step.
 - **Languages:** talk to the user in Italian. Everything written in the repo (code, comments, docs, skills) is in English.
 - **All project knowledge lives in the repo** (`CLAUDE.md`, `.claude/`, `docs/`). Update `docs/progress.md` when a step is done
   and `docs/decisions.md` when a design decision is made.
 
 ## Commands
 
-| Command             | Purpose                                 |
-| ------------------- | --------------------------------------- |
-| `npm run dev`       | Start the Vite dev server with the demo |
-| `npm run build`     | Production build                        |
-| `npm run preview`   | Preview the production build            |
-| `npm run typecheck` | `tsc --noEmit` (added in step 2.1)      |
-| `npm run lint`      | ESLint (type-aware typescript-eslint)   |
-| `npm run format`    | Prettier, write                         |
-| `npm run format:check` | Prettier, check only                 |
-| `npm run test`      | Vitest (added in step 2.6)              |
+| Command                | Purpose                                 |
+| ---------------------- | --------------------------------------- |
+| `npm run dev`          | Start the Vite dev server with the demo |
+| `npm run build`        | Production build                        |
+| `npm run preview`      | Preview the production build            |
+| `npm run typecheck`    | `tsc --noEmit` (added in step 2.1)      |
+| `npm run lint`         | ESLint (type-aware typescript-eslint)   |
+| `npm run format`       | Prettier, write                         |
+| `npm run format:check` | Prettier, check only                    |
+| `npm run test`         | Vitest (added in step 2.6)              |
 
 ## Repository layout
 

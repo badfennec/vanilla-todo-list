@@ -25,6 +25,7 @@ Run the `verify` skill.
 Passo X.Y fatto: <one line summary>
 
 **Cosa ho cambiato e perché:**
+
 - `path/to/file`: what changed and why (reference audit IDs, e.g. "risolve A3")
 
 **Verifica:** <results from the verify skill>
@@ -32,6 +33,7 @@ Passo X.Y fatto: <one line summary>
 **Note:** <deviations from the plan, open questions, things the user must do — omit if none>
 
 **Commit suggerito:**
+
 ```
 type: short lowercase message
 ```
