@@ -50,9 +50,9 @@ Status: `open` until the refactor step that resolves it is done, then `resolved 
 
 ## D. Project / tooling
 
-| ID  | Problem                                                                                                                                                                 | Status |
-| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| D1  | `package.json` name is `"01"`. `vite.config.js` is in `.gitignore`. No lib-mode build, even though the README presents the project as a library.                        | open   |
-| D2  | Non-standard layout (`badfennec-todo/` at the root, app in `assets/js/`). Inconsistent imports (`./icons` vs `./icons.js`) and icon names (`CheckedIcon` vs `addIcon`). | open   |
-| D3  | No linter, formatter, types or tests.                                                                                                                                   | open   |
-| D4  | README: the `const icons: {` example has a syntax error, there is a "toogle" typo, code blocks are tagged `bash`, and the clone URL doesn't match the repo.             | open   |
+| ID  | Problem                                                                                                                                                                 | Status              |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| D1  | `package.json` name is `"01"`. `vite.config.js` is in `.gitignore`. No lib-mode build, even though the README presents the project as a library.                        | open                |
+| D2  | Non-standard layout (`badfennec-todo/` at the root, app in `assets/js/`). Inconsistent imports (`./icons` vs `./icons.js`) and icon names (`CheckedIcon` vs `addIcon`). | open                |
+| D3  | No linter, formatter, types or tests.                                                                                                                                   | resolved (step 2.6) |
+| D4  | README: the `const icons: {` example has a syntax error, there is a "toogle" typo, code blocks are tagged `bash`, and the clone URL doesn't match the repo.             | open                |

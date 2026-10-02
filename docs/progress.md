@@ -31,7 +31,7 @@ When a step is done:
 | [x]  | 2.3  | —                                                                                                                | `vite.config.ts`, remove `vite.config.js` from `.gitignore`, fix package `name` | D1       | `chore: add vite config and fix package name` |
 | [x]  | 2.4  | `npm i -D typescript@~6.0.3` then `npm i -D eslint @eslint/js typescript-eslint prettier eslint-config-prettier` | `eslint.config.js`, `.prettierrc`, `.editorconfig`, `lint` / `format` scripts   | D3       | `chore: add lint and format tooling`          |
 | [x]  | 2.5  | —                                                                                                                | Run `npm run format` on the existing docs and config files (formatting only)    | —        | `style: format files with prettier`           |
-| [ ]  | 2.6  | `npm i -D vitest happy-dom`                                                                                      | Vitest config, `test` script, one smoke test                                    | D3       | `test: add vitest setup`                      |
+| [x]  | 2.6  | `npm i -D vitest happy-dom`                                                                                      | Vitest config, `test` script, one smoke test                                    | D3       | `test: add vitest setup`                      |
 
 ## Phase 3 — Model (no DOM)
 
