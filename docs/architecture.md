@@ -80,6 +80,7 @@ type TodoItem = { id: string; text: string; completed: boolean };
   the active items in the first container and the completed items in the second.
 - Completing an item moves it to the end of the completed items. Un-completing it restores its previous active index
   (see ADR-009).
+- Only active items can be moved. `move(id, toIndex)` takes the final index among the active items (see ADR-011).
 
 ## Drag & drop flow
 
@@ -119,5 +120,4 @@ The item gap moves from a JS option (`itemsGap`) to the CSS custom property `--b
 
 ## Open points (to decide during the refactor)
 
-- `move` index semantics: index within the active items only (proposed) or within the whole array.
 - Keyboard reordering keys (e.g. `Alt+↑/↓` on the handle).

@@ -100,3 +100,15 @@ Format: `## ADR-NNN — Title` · date · status (`accepted` / `superseded by AD
   with existing ones: `createId` skips ids already in use, both in `parseItems` and in `TodoStore.add`.
 - **Consequences:** The API stays small. The README must document both persistence patterns (step 6.4).
   `changeId` can still be added later without breaking changes if a real need appears.
+
+## ADR-011 — `move` takes the final index among active items
+
+- **Date:** 2026-10-02 · **Status:** accepted
+- **Context:** Reordering needs a way to express the destination. The two common forms are a final index
+  (`move(id, 6)`: "it becomes the 7th") and a reference item (`move(id, beforeId)`: "put it before that one").
+- **Decision:** `move(id, toIndex)` with the **final index among the active items**, like SortableJS's `newIndex`.
+  Only active items can be moved; completed ones keep their completion order (ADR-009). An invalid index throws a
+  `RangeError`; moving to the current index does nothing.
+- **Consequences:** It matches what drag & drop computes ("dropped at position N") and reads the same when moving up
+  or down. A reference item would be more robust if the list changed between computing and applying the move, but moves
+  are applied immediately, so that case doesn't arise.

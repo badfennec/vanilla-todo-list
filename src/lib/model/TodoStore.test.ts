@@ -201,11 +201,128 @@ describe('TodoStore', () => {
     });
   });
 
+  describe('move', () => {
+    const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+    const letters = (count: number) => LETTERS.slice(0, count).map((letter) => item(letter));
+
+    it('moves an item up: from 10th to 7th', () => {
+      const store = new TodoStore(letters(10));
+
+      store.move('J', 6);
+
+      expect(ids(store)).toEqual(['A', 'B', 'C', 'D', 'E', 'F', 'J', 'G', 'H', 'I']);
+    });
+
+    it('moves an item down: from 3rd to 7th', () => {
+      const store = new TodoStore(letters(10));
+
+      store.move('C', 6);
+
+      expect(ids(store)).toEqual(['A', 'B', 'D', 'E', 'F', 'G', 'C', 'H', 'I', 'J']);
+    });
+
+    it('moves to the first and to the last active position', () => {
+      const store = new TodoStore([...letters(3), item('x', true)]);
+
+      store.move('C', 0);
+      expect(ids(store)).toEqual(['C', 'A', 'B', 'x✓']);
+
+      store.move('C', 2);
+      expect(ids(store)).toEqual(['A', 'B', 'C', 'x✓']);
+    });
+
+    it('emits move with the active indexes, then change', () => {
+      const store = new TodoStore(letters(3));
+      const onMove = vi.fn();
+      const events: string[] = [];
+      store.on('move', onMove);
+      store.on('move', () => events.push('move'));
+      store.on('change', () => events.push('change'));
+
+      store.move('A', 2);
+
+      expect(onMove).toHaveBeenCalledExactlyOnceWith({ item: item('A'), fromIndex: 0, toIndex: 2 });
+      expect(events).toEqual(['move', 'change']);
+    });
+
+    it('does nothing when the item is already at that index', () => {
+      const store = new TodoStore(letters(3));
+      const onChange = vi.fn();
+      store.on('change', onChange);
+
+      store.move('B', 1);
+
+      expect(ids(store)).toEqual(['A', 'B', 'C']);
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('rejects completed items', () => {
+      const store = new TodoStore([item('a'), item('b', true)]);
+
+      expect(() => store.move('b', 0)).toThrow(new Error('Todo item "b" is completed and cannot be moved'));
+    });
+
+    it.each([-1, 3, 1.5, Number.NaN])('rejects the out-of-range index %s', (toIndex) => {
+      const store = new TodoStore([...letters(3), item('x', true)]);
+
+      expect(() => store.move('A', toIndex)).toThrow(RangeError);
+      expect(ids(store)).toEqual(['A', 'B', 'C', 'x✓']);
+    });
+  });
+
+  describe('setItems', () => {
+    it('replaces every item, active ones first', () => {
+      const store = new TodoStore([item('old')]);
+
+      store.setItems([item('a', true), item('b')]);
+
+      expect(ids(store)).toEqual(['b', 'a✓']);
+    });
+
+    it('stores frozen copies of the given items', () => {
+      const input = [item('a')];
+      const store = new TodoStore();
+
+      store.setItems(input);
+      input.push(item('b'));
+
+      expect(ids(store)).toEqual(['a']);
+      expect(Object.isFrozen(store.getItems()[0])).toBe(true);
+    });
+
+    it('emits only change, with the new items', () => {
+      const store = new TodoStore([item('old')]);
+      const onRemove = vi.fn();
+      const onAdd = vi.fn();
+      const onChange = vi.fn();
+      store.on('remove', onRemove);
+      store.on('add', onAdd);
+      store.on('change', onChange);
+
+      store.setItems([item('a')]);
+
+      expect(onRemove).not.toHaveBeenCalled();
+      expect(onAdd).not.toHaveBeenCalled();
+      expect(onChange).toHaveBeenCalledExactlyOnceWith({ items: [item('a')] });
+    });
+
+    it('forgets the positions remembered by toggle', () => {
+      const store = new TodoStore([item('a'), item('b')]);
+      store.toggle('a');
+
+      store.setItems([item('b'), item('c'), item('a', true)]);
+      store.toggle('a');
+
+      expect(ids(store)).toEqual(['b', 'c', 'a']);
+    });
+  });
+
   describe('unknown ids', () => {
     it.each([
       ['remove', (store: TodoStore) => store.remove('x')],
       ['toggle', (store: TodoStore) => store.toggle('x')],
       ['edit', (store: TodoStore) => store.edit('x', 'text')],
+      ['move', (store: TodoStore) => store.move('x', 0)],
     ])('%s throws', (_name, action) => {
       const store = new TodoStore([item('a')]);
 

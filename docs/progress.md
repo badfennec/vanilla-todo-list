@@ -42,7 +42,7 @@ When a step is done:
 | [x]  | 3.3  | `events/TypedEmitter.ts` + tests                                              | B5         | `feat: add typed event emitter`         |
 | [x]  | 3.4  | `TodoStore`: `add`, `remove`, `toggle`, `edit`, `getItems` + tests            | B1, B4, A6 | `feat: add todo store`                  |
 | [x]  | 3.5  | Generated ids never clash with existing ones (`createId`), ADR-010            | —          | `fix: ensure generated ids are unique`  |
-| [ ]  | 3.6  | `TodoStore`: `move`, `setItems` + tests (decide `move` index semantics first) | B6         | `feat: add move and set items to store` |
+| [x]  | 3.6  | `TodoStore`: `move`, `setItems` + tests (decide `move` index semantics first) | B6         | `feat: add move and set items to store` |
 
 ## Phase 4 — Views
 
