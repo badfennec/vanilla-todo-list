@@ -1,3 +1,4 @@
+import { createId } from './createId';
 import type { ParsedTodoOptions, TodoIcons, TodoItem, TodoLabels, TodoOptions } from './types';
 
 // Typed as Record<keyof T, true> so the compiler fails if a key is added to the interface but not here.
@@ -10,24 +11,13 @@ const LABEL_KEYS = keysOf<TodoLabels>({ addItem: true, toggle: true, delete: tru
  * @throws {TypeError} if the value is not a valid item.
  */
 export function parseItem(value: unknown, path = 'item'): TodoItem {
-  if (!isRecord(value)) {
-    throw new TypeError(`${path} must be an object`);
-  }
+  const { id, ...fields } = parseItemFields(value, path);
 
-  const id = readOptional(value, 'id', 'string', path);
-  if (id === '') {
-    throw new TypeError(`${path}.id must not be empty`);
-  }
-
-  return {
-    id: id ?? crypto.randomUUID(),
-    text: readOptional(value, 'text', 'string', path) ?? '',
-    completed: readOptional(value, 'completed', 'boolean', path) ?? false,
-  };
+  return { id: id ?? createId(), ...fields };
 }
 
 /**
- * Validates a list of consumer-provided items. Ids must be unique.
+ * Validates a list of consumer-provided items. Provided ids must be unique; generated ids never clash with them.
  * @throws {TypeError} if the value is not an array of valid items.
  */
 export function parseItems(value: unknown, path = 'items'): TodoItem[] {
@@ -35,17 +25,27 @@ export function parseItems(value: unknown, path = 'items'): TodoItem[] {
     throw new TypeError(`${path} must be an array`);
   }
 
-  const seenIds = new Set<string>();
+  const usedIds = new Set<string>();
+  const parsed = value.map((entry: unknown, index) => {
+    const itemPath = `${path}[${String(index)}]`;
+    const fields = parseItemFields(entry, itemPath);
 
-  return value.map((entry: unknown, index) => {
-    const item = parseItem(entry, `${path}[${String(index)}]`);
-
-    if (seenIds.has(item.id)) {
-      throw new TypeError(`${path}[${String(index)}].id "${item.id}" is duplicated`);
+    if (fields.id !== undefined) {
+      if (usedIds.has(fields.id)) {
+        throw new TypeError(`${itemPath}.id "${fields.id}" is duplicated`);
+      }
+      usedIds.add(fields.id);
     }
-    seenIds.add(item.id);
 
-    return item;
+    return fields;
+  });
+
+  // Ids are generated only after every provided id is known.
+  return parsed.map(({ id, ...fields }) => {
+    const itemId = id ?? createId((candidate) => usedIds.has(candidate));
+    usedIds.add(itemId);
+
+    return { id: itemId, ...fields };
   });
 }
 
@@ -70,6 +70,24 @@ export function parseOptions(value: unknown = {}): ParsedTodoOptions {
     items: value.items === undefined ? [] : parseItems(value.items, `${path}.items`),
     icons: parseStringMap(value.icons, ICON_KEYS, `${path}.icons`),
     labels: parseStringMap(value.labels, LABEL_KEYS, `${path}.labels`),
+  };
+}
+
+/** Validates the fields of an item without generating the id. */
+function parseItemFields(value: unknown, path: string): Omit<TodoItem, 'id'> & { id: string | undefined } {
+  if (!isRecord(value)) {
+    throw new TypeError(`${path} must be an object`);
+  }
+
+  const id = readOptional(value, 'id', 'string', path);
+  if (id === '') {
+    throw new TypeError(`${path}.id must not be empty`);
+  }
+
+  return {
+    id,
+    text: readOptional(value, 'text', 'string', path) ?? '',
+    completed: readOptional(value, 'completed', 'boolean', path) ?? false,
   };
 }
 

@@ -74,7 +74,8 @@ user action ──▶ TodoItemView / DragController ──(callback)──▶ To
 type TodoItem = { id: string; text: string; completed: boolean };
 ```
 
-- `id` is a string. If the consumer omits it, the store generates one with `crypto.randomUUID()`.
+- `id` is an opaque string. If the consumer omits it, a UUID is generated that never clashes with an existing id.
+- The library is agnostic about persistence: mapping its ids to database ids is the consumer's job (see ADR-010).
 - The store keeps **one** array, always in display order: active items first, then completed ones. The view renders
   the active items in the first container and the completed items in the second.
 - Completing an item moves it to the end of the completed items. Un-completing it restores its previous active index

@@ -1,6 +1,6 @@
 import { type Listener, TypedEmitter } from '../events/TypedEmitter';
+import { createId } from './createId';
 import type { TodoItem } from './types';
-import { parseItem } from './validation';
 
 export interface TodoStoreEvents {
   add: { item: TodoItem };
@@ -41,9 +41,10 @@ export class TodoStore {
     return [...this.#items];
   }
 
-  /** Adds a new active item at the end of the active items. */
+  /** Adds a new active item at the end of the active items. Its id never clashes with an existing one. */
   add(text = ''): TodoItem {
-    const item = Object.freeze(parseItem({ text }));
+    const id = createId((candidate) => this.#items.some((item) => item.id === candidate));
+    const item = Object.freeze({ id, text, completed: false });
     this.#items.splice(this.#activeCount(), 0, item);
 
     this.#emit('add', item);

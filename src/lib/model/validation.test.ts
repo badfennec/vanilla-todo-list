@@ -1,6 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { parseItem, parseItems, parseOptions } from './validation';
+
+type UUID = ReturnType<typeof crypto.randomUUID>;
 
 describe('parseItem', () => {
   it('keeps the provided fields', () => {
@@ -43,6 +45,10 @@ describe('parseItem', () => {
 });
 
 describe('parseItems', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it('parses every item in order', () => {
     expect(parseItems([{ id: 'a' }, { id: 'b', completed: true }])).toEqual([
       { id: 'a', text: '', completed: false },
@@ -56,6 +62,15 @@ describe('parseItems', () => {
 
   it('reports the index of the invalid item', () => {
     expect(() => parseItems([{}, { text: 1 }])).toThrow(new TypeError('items[1].text must be a string'));
+  });
+
+  it('never generates an id that is provided by another item', () => {
+    vi.spyOn(crypto, 'randomUUID')
+      .mockReturnValueOnce('b' as UUID)
+      .mockReturnValueOnce('c' as UUID);
+
+    // The generated id would clash with "b", provided by a later item.
+    expect(parseItems([{ id: 'a' }, {}, { id: 'b' }]).map((item) => item.id)).toEqual(['a', 'c', 'b']);
   });
 
   it('rejects duplicated ids', () => {

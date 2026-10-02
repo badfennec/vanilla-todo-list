@@ -1,7 +1,9 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { TodoStore } from './TodoStore';
 import type { TodoItem } from './types';
+
+type UUID = ReturnType<typeof crypto.randomUUID>;
 
 const item = (id: string, completed = false): TodoItem => ({ id, text: id, completed });
 
@@ -9,6 +11,10 @@ const item = (id: string, completed = false): TodoItem => ({ id, text: id, compl
 const ids = (store: TodoStore): string[] => store.getItems().map(({ id, completed }) => (completed ? `${id}✓` : id));
 
 describe('TodoStore', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   describe('constructor', () => {
     it('starts empty by default', () => {
       expect(new TodoStore().getItems()).toEqual([]);
@@ -54,6 +60,15 @@ describe('TodoStore', () => {
 
       expect(added).toMatchObject({ text: 'New', completed: false });
       expect(ids(store)).toEqual(['a', added.id, 'b✓']);
+    });
+
+    it('never generates an id that is already in the list', () => {
+      vi.spyOn(crypto, 'randomUUID')
+        .mockReturnValueOnce('a' as UUID)
+        .mockReturnValueOnce('b' as UUID);
+      const store = new TodoStore([item('a')]);
+
+      expect(store.add().id).toBe('b');
     });
 
     it('uses an empty text by default', () => {
