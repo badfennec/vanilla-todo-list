@@ -27,9 +27,10 @@ When a step is done:
 | Done | Step | Install                                                                   | Content                                                                         | Resolves | Suggested commit                              |
 | ---- | ---- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | -------- | --------------------------------------------- |
 | [x]  | 2.1  | `npm i -D typescript`                                                     | `tsconfig.json` (strict) + `typecheck` script                                    | D3       | `chore: add typescript config`                |
-| [ ]  | 2.2  | —                                                                         | `vite.config.ts`, remove `vite.config.js` from `.gitignore`, fix package `name` | D1       | `chore: add vite config and fix package name` |
-| [ ]  | 2.3  | `npm i -D eslint @eslint/js typescript-eslint prettier eslint-config-prettier` | `eslint.config.js`, `.prettierrc`, `.editorconfig`, `lint` / `format` scripts | D3       | `chore: add lint and format tooling`          |
-| [ ]  | 2.4  | `npm i -D vitest happy-dom`                                               | Vitest config, `test` script, one smoke test                                    | D3       | `test: add vitest setup`                      |
+| [x]  | 2.2  | —                                                                         | `.nvmrc` + `engines` in `package.json`                                          | —        | `chore: add nvmrc and node engines`           |
+| [ ]  | 2.3  | —                                                                         | `vite.config.ts`, remove `vite.config.js` from `.gitignore`, fix package `name` | D1       | `chore: add vite config and fix package name` |
+| [ ]  | 2.4  | `npm i -D eslint @eslint/js typescript-eslint prettier eslint-config-prettier` | `eslint.config.js`, `.prettierrc`, `.editorconfig`, `lint` / `format` scripts | D3       | `chore: add lint and format tooling`          |
+| [ ]  | 2.5  | `npm i -D vitest happy-dom`                                               | Vitest config, `test` script, one smoke test                                    | D3       | `test: add vitest setup`                      |
 
 ## Phase 3 — Model (no DOM)
 
