@@ -22,20 +22,20 @@ Status: `open` until the refactor step that resolves it is done, then `resolved 
 
 ## B. Architecture / OOP
 
-| ID  | Problem                                                                                                                                                                                                       | Status |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| B1  | **The DOM is the source of truth.** `sort.js` rebuilds the array order from `getBoundingClientRect()`. No model/view separation.                                                                              | open   |
-| B2  | **God object** `BadFennecTodo`: it owns state, drag state (`delta`, `dragY`, `draggingItem`), DOM creation, events and the completed-container logic.                                                         | open   |
-| B3  | **Circular coupling**: `TodoItem`, `DragEvents` and `DragIntersector` all receive the parent `ToDo` and read and write its internals (`draggingItem`, `el.style.cursor`, `items`, `dragY`…).                  | open   |
-| B4  | **Fake reactivity**: `Reactive` is a misused event bus. Its `value` is never read, state is duplicated three times (`text` / `oldText` / `reactive.value.text`), and `subscribe` fires immediately.           | open   |
-| B5  | `Events`: one callback per event (each call overwrites the previous one), no `off()`, one copy-pasted method per event.                                                                                       | open   |
-| B6  | `Sorting`: a class created on every drag end that shallow-copies a class instance (`{...draggingItem}`) only to compare `startY`.                                                                             | open   |
-| B7  | `DOMHandler`: a class with no state. It should be a view, or plain functions.                                                                                                                                 | open   |
-| B8  | Constructors with 15+ loose arguments (`TodoItem`). Defaults (icons) are scattered across 3 files.                                                                                                            | open   |
-| B9  | Everything is public and mutable. Dead code: `rect`, `draggingItemOriginY`, `index`/`setIndex`, `middleHeight`, `marginBottom`, `spaceAvailableHeight`, the unused `deltaY` in `#move`, commented-out blocks. | open   |
-| B10 | Misleading names: the "deltaY" passed around is actually the absolute `clientY`. `onUpdate` means toggle.                                                                                                     | open   |
-| B11 | The public API is only `on()`. Missing: `add`, `remove`, `getItems`, `setItems`, `destroy`, `off`.                                                                                                            | open   |
-| B12 | No input validation: a selector that matches nothing crashes later with an unclear error.                                                                                                                     | open   |
+| ID  | Problem                                                                                                                                                                                                       | Status              |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| B1  | **The DOM is the source of truth.** `sort.js` rebuilds the array order from `getBoundingClientRect()`. No model/view separation.                                                                              | open                |
+| B2  | **God object** `BadFennecTodo`: it owns state, drag state (`delta`, `dragY`, `draggingItem`), DOM creation, events and the completed-container logic.                                                         | open                |
+| B3  | **Circular coupling**: `TodoItem`, `DragEvents` and `DragIntersector` all receive the parent `ToDo` and read and write its internals (`draggingItem`, `el.style.cursor`, `items`, `dragY`…).                  | open                |
+| B4  | **Fake reactivity**: `Reactive` is a misused event bus. Its `value` is never read, state is duplicated three times (`text` / `oldText` / `reactive.value.text`), and `subscribe` fires immediately.           | open                |
+| B5  | `Events`: one callback per event (each call overwrites the previous one), no `off()`, one copy-pasted method per event.                                                                                       | resolved (step 3.3) |
+| B6  | `Sorting`: a class created on every drag end that shallow-copies a class instance (`{...draggingItem}`) only to compare `startY`.                                                                             | open                |
+| B7  | `DOMHandler`: a class with no state. It should be a view, or plain functions.                                                                                                                                 | open                |
+| B8  | Constructors with 15+ loose arguments (`TodoItem`). Defaults (icons) are scattered across 3 files.                                                                                                            | open                |
+| B9  | Everything is public and mutable. Dead code: `rect`, `draggingItemOriginY`, `index`/`setIndex`, `middleHeight`, `marginBottom`, `spaceAvailableHeight`, the unused `deltaY` in `#move`, commented-out blocks. | open                |
+| B10 | Misleading names: the "deltaY" passed around is actually the absolute `clientY`. `onUpdate` means toggle.                                                                                                     | open                |
+| B11 | The public API is only `on()`. Missing: `add`, `remove`, `getItems`, `setItems`, `destroy`, `off`.                                                                                                            | open                |
+| B12 | No input validation: a selector that matches nothing crashes later with an unclear error.                                                                                                                     | open                |
 
 ## C. UI / accessibility / CSS
 
