@@ -60,3 +60,14 @@ Format: `## ADR-NNN — Title` · date · status (`accepted` / `superseded by AD
 - **Decision:** Claude never runs git or installs packages. These are enforced in `.claude/settings.json`. Work goes in small
   steps, and each step ends with a change summary plus a suggested Conventional Commit message that the user commits.
 - **Consequences:** The pace is slower but every change is reviewable. See `CLAUDE.md`.
+
+## ADR-008 — TypeScript pinned to 6.0 while the lint ecosystem catches up
+
+- **Date:** 2026-10-02 · **Status:** accepted
+- **Context:** TypeScript 7 (the native Go port of the compiler) no longer ships the JavaScript compiler API, only an
+  `unstable/*` API. `typescript-eslint` depends on that API: its latest version (8.71.0) requires `typescript >=4.8.4 <6.1.0`.
+  The language and type system are the same in 6.0 and 7; only compiler speed differs.
+- **Decision:** Use the current standard stack (ESLint + type-aware `typescript-eslint` + Prettier) with TypeScript pinned
+  to `~6.0.3`. Don't force the peer conflict (`--force`, `--legacy-peer-deps`) and don't switch to less common tools.
+- **Consequences:** No code changes are needed later. Upgrade to TypeScript 7 in a dedicated step once `typescript-eslint`
+  supports it (check its `peerDependencies`).

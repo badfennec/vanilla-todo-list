@@ -25,8 +25,10 @@ TypeScript library under `src/` with a redesigned public API.
 | `npm run build`     | Production build                        |
 | `npm run preview`   | Preview the production build            |
 | `npm run typecheck` | `tsc --noEmit` (added in step 2.1)      |
-| `npm run lint`      | ESLint (added in step 2.4)              |
-| `npm run test`      | Vitest (added in step 2.5)              |
+| `npm run lint`      | ESLint (type-aware typescript-eslint)   |
+| `npm run format`    | Prettier, write                         |
+| `npm run format:check` | Prettier, check only                 |
+| `npm run test`      | Vitest (added in step 2.6)              |
 
 ## Repository layout
 
