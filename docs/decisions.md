@@ -71,3 +71,15 @@ Format: `## ADR-NNN — Title` · date · status (`accepted` / `superseded by AD
   to `~6.0.3`. Don't force the peer conflict (`--force`, `--legacy-peer-deps`) and don't switch to less common tools.
 - **Consequences:** No code changes are needed later. Upgrade to TypeScript 7 in a dedicated step once `typescript-eslint`
   supports it (check its `peerDependencies`).
+
+## ADR-009 — Item position when toggling
+
+- **Date:** 2026-10-02 · **Status:** accepted
+- **Context:** The store keeps items in display order (active first, then completed), so toggling must decide where an
+  item goes.
+- **Decision:** Completing an item moves it to the **end of the completed items** (chronological order). Un-completing
+  it restores it to the **active index it had when it was completed**. If that index no longer exists (fewer active
+  items now), or the item was already completed when the list was created, it goes to the end of the active items.
+- **Consequences:** The store keeps one extra map (`id → active index`). The restored position is an index, not a
+  neighbor: if the active items were reordered in the meantime, the item returns to the same slot, not next to the same
+  items.

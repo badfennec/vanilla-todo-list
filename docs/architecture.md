@@ -75,8 +75,10 @@ type TodoItem = { id: string; text: string; completed: boolean };
 ```
 
 - `id` is a string. If the consumer omits it, the store generates one with `crypto.randomUUID()`.
-- The store keeps **one** ordered array. The view renders active items (in array order) in the first container and
-  completed items in the second.
+- The store keeps **one** array, always in display order: active items first, then completed ones. The view renders
+  the active items in the first container and the completed items in the second.
+- Completing an item moves it to the end of the completed items. Un-completing it restores its previous active index
+  (see ADR-009).
 
 ## Drag & drop flow
 
@@ -116,6 +118,5 @@ The item gap moves from a JS option (`itemsGap`) to the CSS custom property `--b
 
 ## Open points (to decide during the refactor)
 
-- When an item is un-completed: append it to the end of the active list, or restore its previous position?
 - `move` index semantics: index within the active items only (proposed) or within the whole array.
 - Keyboard reordering keys (e.g. `Alt+↑/↓` on the handle).

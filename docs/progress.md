@@ -35,13 +35,13 @@ When a step is done:
 
 ## Phase 3 — Model (no DOM)
 
-| Done | Step | Content                                                                                                | Resolves   | Suggested commit                        |
-| ---- | ---- | ------------------------------------------------------------------------------------------------------ | ---------- | --------------------------------------- |
-| [x]  | 3.1  | `model/types.ts`: `TodoItem`, `TodoItemInput`, `TodoOptions`, icons, labels                            | B9         | `feat: add todo model types`            |
-| [x]  | 3.2  | `model/validation.ts` + tests                                                                          | B12, A8    | `feat: add input validation`            |
-| [x]  | 3.3  | `events/TypedEmitter.ts` + tests                                                                       | B5         | `feat: add typed event emitter`         |
-| [ ]  | 3.4  | `TodoStore`: `add`, `remove`, `toggle`, `edit`, `getItems` + tests                                     | B1, B4, A6 | `feat: add todo store`                  |
-| [ ]  | 3.5  | `TodoStore`: `move`, `setItems` + tests (decide `move` index semantics and un-complete position first) | B6         | `feat: add move and set items to store` |
+| Done | Step | Content                                                                       | Resolves   | Suggested commit                        |
+| ---- | ---- | ----------------------------------------------------------------------------- | ---------- | --------------------------------------- |
+| [x]  | 3.1  | `model/types.ts`: `TodoItem`, `TodoItemInput`, `TodoOptions`, icons, labels   | B9         | `feat: add todo model types`            |
+| [x]  | 3.2  | `model/validation.ts` + tests                                                 | B12, A8    | `feat: add input validation`            |
+| [x]  | 3.3  | `events/TypedEmitter.ts` + tests                                              | B5         | `feat: add typed event emitter`         |
+| [x]  | 3.4  | `TodoStore`: `add`, `remove`, `toggle`, `edit`, `getItems` + tests            | B1, B4, A6 | `feat: add todo store`                  |
+| [ ]  | 3.5  | `TodoStore`: `move`, `setItems` + tests (decide `move` index semantics first) | B6         | `feat: add move and set items to store` |
 
 ## Phase 4 — Views
 
