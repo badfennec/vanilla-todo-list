@@ -45,7 +45,7 @@ Status: `open` until the refactor step that resolves it is done, then `resolved 
 | C2  | `contentEditable=true` with no Enter handling and no paste sanitization (use `plaintext-only` or an `<input>`).                           | resolved (step 4.2) |
 | C3  | Inline styles set from JS (`flexGrow`, `outline`, `cursor`, `marginBottom` for the gap). They belong in CSS (custom property `--bf-gap`). | open                |
 | C4  | Hardcoded colors, no CSS variables or theming. Dead CSS: `.badfennec-todo__item--intersected`.                                            | resolved (step 4.1) |
-| C5  | `innerHTML` with consumer-provided SVG strings is an XSS surface. Document it, or accept `SVGElement`.                                    | open                |
+| C5  | `innerHTML` with consumer-provided SVG strings is an XSS surface. Document it, or accept `SVGElement`.                                    | resolved (step 6.4) |
 | C6  | The library itself imports `@fontsource/poppins`, forcing a font on consumers (and contradicting the "zero dependencies" claim).          | resolved (step 6.3) |
 
 ## D. Project / tooling
@@ -55,4 +55,4 @@ Status: `open` until the refactor step that resolves it is done, then `resolved 
 | D1  | `package.json` name is `"01"`. `vite.config.js` is in `.gitignore`. No lib-mode build, even though the README presents the project as a library.                        | resolved (step 6.2) |
 | D2  | Non-standard layout (`badfennec-todo/` at the root, app in `assets/js/`). Inconsistent imports (`./icons` vs `./icons.js`) and icon names (`CheckedIcon` vs `addIcon`). | open                |
 | D3  | No linter, formatter, types or tests.                                                                                                                                   | resolved (step 2.6) |
-| D4  | README: the `const icons: {` example has a syntax error, there is a "toogle" typo, code blocks are tagged `bash`, and the clone URL doesn't match the repo.             | open                |
+| D4  | README: the `const icons: {` example has a syntax error, there is a "toogle" typo, code blocks are tagged `bash`, and the clone URL doesn't match the repo.             | resolved (step 6.4) |
