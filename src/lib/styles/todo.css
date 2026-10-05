@@ -45,6 +45,11 @@
   list-style: none;
 }
 
+.badfennec-todo__list--active {
+  /* The dragged item is positioned inside the active list. */
+  position: relative;
+}
+
 .badfennec-todo__list:empty {
   display: none;
 }
@@ -74,10 +79,19 @@
 }
 
 .badfennec-todo__item--dragging {
-  position: relative;
-  z-index: 1000;
+  /* Out of the flow while dragging: JS sets only `top` and `transform`. */
+  position: absolute;
+  inset-inline: 0;
+  z-index: 1;
   opacity: 0.8;
   box-shadow: var(--bf-shadow-dragging);
+}
+
+/* Keeps the slot of the dragged item; JS sets its height to the item's height. */
+.badfennec-todo__placeholder {
+  box-sizing: border-box;
+  border: 2px dashed var(--bf-border-color);
+  border-radius: var(--bf-radius);
 }
 
 /* Icon buttons (real <button> elements) */

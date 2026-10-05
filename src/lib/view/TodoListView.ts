@@ -1,3 +1,5 @@
+import { DragController } from '../drag/DragController';
+import { resolveDropIndex, type VerticalSpan } from '../drag/resolveDropIndex';
 import type { TodoIcons, TodoItem, TodoLabels } from '../model/types';
 import { TodoItemView } from './TodoItemView';
 
@@ -11,6 +13,32 @@ export interface TodoListViewOptions {
   readonly onDelete: (id: string) => void;
   /** The user asked for a new item (the "add" row). */
   readonly onAdd: () => void;
+  /** The user dropped an active item at `toIndex` among the active items (only called when the index changes). */
+  readonly onMove: (id: string, toIndex: number) => void;
+}
+
+interface Entry {
+  readonly view: TodoItemView;
+  readonly drag: DragController;
+}
+
+interface ActiveItem {
+  readonly id: string;
+  readonly element: HTMLLIElement;
+}
+
+/** State of the current drag; it exists only between start and end/cancel. */
+interface DragState {
+  readonly id: string;
+  readonly element: HTMLLIElement;
+  readonly placeholder: HTMLLIElement;
+  /** Active items measured at drag start, relative to the active list (so page scroll doesn't matter). */
+  readonly spans: readonly VerticalSpan[];
+  readonly fromIndex: number;
+  readonly startTop: number;
+  readonly height: number;
+  /** Drop index the placeholder currently shows. */
+  index: number;
 }
 
 /**
@@ -23,13 +51,18 @@ export class TodoListView {
   readonly #activeList: HTMLUListElement;
   readonly #completedList: HTMLUListElement;
   readonly #addButton: HTMLButtonElement;
-  readonly #views = new Map<string, TodoItemView>();
-  readonly #itemOptions: Omit<TodoListViewOptions, 'root' | 'onAdd'>;
+  readonly #entries = new Map<string, Entry>();
+  readonly #itemOptions: Omit<TodoListViewOptions, 'root' | 'onAdd' | 'onMove'>;
   readonly #onAdd: () => void;
+  readonly #onMove: (id: string, toIndex: number) => void;
+  /** Active items of the last render, in display order. */
+  #active: readonly ActiveItem[] = [];
+  #drag: DragState | undefined;
 
-  constructor({ root, onAdd, ...itemOptions }: TodoListViewOptions) {
+  constructor({ root, onAdd, onMove, ...itemOptions }: TodoListViewOptions) {
     this.#root = root;
     this.#onAdd = onAdd;
+    this.#onMove = onMove;
     this.#itemOptions = itemOptions;
 
     this.#activeList = createList('badfennec-todo__list--active');
@@ -43,28 +76,44 @@ export class TodoListView {
 
   /** Creates, updates and removes item views so that the lists show exactly these items, in this order. */
   render(items: readonly TodoItem[]): void {
+    // The items may have changed under the drag (e.g. a pending edit was applied): stop it, nothing is moved.
+    if (this.#drag) {
+      this.#entries.get(this.#drag.id)?.drag.cancel();
+      this.#finishDrag();
+    }
+
     const ids = new Set(items.map((item) => item.id));
-    for (const [id, view] of this.#views) {
+    for (const [id, entry] of this.#entries) {
       if (!ids.has(id)) {
-        view.destroy();
-        this.#views.delete(id);
+        destroyEntry(entry);
+        this.#entries.delete(id);
       }
     }
 
-    const active: HTMLLIElement[] = [];
+    const active: ActiveItem[] = [];
     const completed: HTMLLIElement[] = [];
     for (const item of items) {
-      let view = this.#views.get(item.id);
-      if (view) {
-        view.update(item);
+      let entry = this.#entries.get(item.id);
+      if (entry) {
+        entry.view.update(item);
       } else {
-        view = new TodoItemView({ item, ...this.#itemOptions });
-        this.#views.set(item.id, view);
+        entry = this.#createEntry(item);
+        this.#entries.set(item.id, entry);
       }
-      (item.completed ? completed : active).push(view.element);
-    }
 
-    placeChildren(this.#activeList, active);
+      const { element } = entry.view;
+      if (item.completed) {
+        completed.push(element);
+      } else {
+        active.push({ id: item.id, element });
+      }
+    }
+    this.#active = active;
+
+    placeChildren(
+      this.#activeList,
+      active.map(({ element }) => element),
+    );
     placeChildren(this.#completedList, completed);
   }
 
@@ -74,19 +123,20 @@ export class TodoListView {
    * @throws {Error} if no rendered item has this id.
    */
   editAsNew(id: string): void {
-    const view = this.#views.get(id);
-    if (!view) {
+    const entry = this.#entries.get(id);
+    if (!entry) {
       throw new Error(`Todo item "${id}" is not rendered`);
     }
-    view.editAsNew();
+    entry.view.editAsNew();
   }
 
-  /** Destroys every item view and removes the lists and the root class. */
+  /** Destroys every item view, stops a drag in progress and removes the lists and the root class. */
   destroy(): void {
-    for (const view of this.#views.values()) {
-      view.destroy();
+    this.#finishDrag();
+    for (const entry of this.#entries.values()) {
+      destroyEntry(entry);
     }
-    this.#views.clear();
+    this.#entries.clear();
     this.#addButton.removeEventListener('click', this.#handleAdd);
     this.#activeList.remove();
     this.#addButton.remove();
@@ -97,6 +147,105 @@ export class TodoListView {
   readonly #handleAdd = (): void => {
     this.#onAdd();
   };
+
+  #createEntry(item: TodoItem): Entry {
+    const { id } = item;
+    const view = new TodoItemView({ item, ...this.#itemOptions });
+    const drag = new DragController({
+      handle: view.handle,
+      element: view.element,
+      canStart: () => this.#active.some((active) => active.id === id),
+      onStart: () => {
+        this.#startDrag(id);
+      },
+      onMove: (offsetY) => {
+        this.#moveDrag(offsetY);
+      },
+      onEnd: () => {
+        this.#endDrag();
+      },
+      onCancel: () => {
+        this.#finishDrag();
+      },
+    });
+
+    return { view, drag };
+  }
+
+  #startDrag(id: string): void {
+    const fromIndex = this.#active.findIndex((active) => active.id === id);
+    const listTop = this.#activeList.getBoundingClientRect().top;
+    const spans = this.#active.map(({ element }) => {
+      const rect = element.getBoundingClientRect();
+      return { top: rect.top - listTop, bottom: rect.bottom - listTop };
+    });
+    const span = spans[fromIndex];
+    const element = this.#active[fromIndex]?.element;
+    if (!span || !element) {
+      return;
+    }
+
+    const height = span.bottom - span.top;
+    const placeholder = document.createElement('li');
+    placeholder.className = 'badfennec-todo__placeholder';
+    placeholder.setAttribute('aria-hidden', 'true');
+    placeholder.style.blockSize = `${String(height)}px`;
+    element.before(placeholder);
+
+    // The item leaves the flow (CSS) and stays where it was; the placeholder keeps its slot.
+    element.style.top = `${String(span.top)}px`;
+    element.classList.add('badfennec-todo__item--dragging');
+    this.#root.classList.add('badfennec-todo--dragging');
+
+    this.#drag = { id, element, placeholder, spans, fromIndex, startTop: span.top, height, index: fromIndex };
+  }
+
+  #moveDrag(offsetY: number): void {
+    const drag = this.#drag;
+    if (!drag) {
+      return;
+    }
+
+    // The middle of the dragged item, not the pointer: the handle is near the top of the item.
+    const y = drag.startTop + offsetY + drag.height / 2;
+    const index = resolveDropIndex(y, drag.spans, drag.fromIndex);
+    if (index === drag.index) {
+      return;
+    }
+
+    drag.index = index;
+    const others = this.#active.filter(({ element }) => element !== drag.element);
+    this.#activeList.insertBefore(drag.placeholder, others[index]?.element ?? null);
+  }
+
+  #endDrag(): void {
+    const drag = this.#drag;
+    this.#finishDrag();
+
+    // The DOM is back as it was; the store applies the move and the next render reorders the items.
+    if (drag && drag.index !== drag.fromIndex) {
+      this.#onMove(drag.id, drag.index);
+    }
+  }
+
+  /** Removes the placeholder and the drag styles. Safe to call when no drag is in progress. */
+  #finishDrag(): void {
+    const drag = this.#drag;
+    if (!drag) {
+      return;
+    }
+
+    this.#drag = undefined;
+    drag.placeholder.remove();
+    drag.element.style.top = '';
+    drag.element.classList.remove('badfennec-todo__item--dragging');
+    this.#root.classList.remove('badfennec-todo--dragging');
+  }
+}
+
+function destroyEntry({ view, drag }: Entry): void {
+  drag.destroy();
+  view.destroy();
 }
 
 function createList(modifier: string): HTMLUListElement {

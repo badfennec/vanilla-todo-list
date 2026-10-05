@@ -130,6 +130,18 @@ describe('DragController', () => {
     expect(handle.hasPointerCapture(1)).toBe(false);
   });
 
+  it('cancels from code, and does nothing when no drag is in progress', () => {
+    const { controller, element, pointer, onCancel } = setup();
+
+    controller.cancel();
+    pointer('pointerdown', { clientY: 100 });
+    pointer('pointermove', { clientY: 150 });
+    controller.cancel();
+
+    expect(onCancel).toHaveBeenCalledOnce();
+    expect(element.style.transform).toBe('');
+  });
+
   it('ignores Escape when no drag is in progress', () => {
     const { onCancel } = setup();
 

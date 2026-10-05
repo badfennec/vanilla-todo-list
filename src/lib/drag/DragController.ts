@@ -37,6 +37,13 @@ export class DragController {
     this.#options.handle.addEventListener('pointerdown', this.#handlePointerDown);
   }
 
+  /** Interrupts the current drag, if any, as if the user pressed Escape (`onCancel` is called). */
+  cancel(): void {
+    if (this.#drag) {
+      this.#cancel();
+    }
+  }
+
   /** Removes every listener. A drag in progress is stopped without calling `onEnd` or `onCancel`. */
   destroy(): void {
     this.#stop();

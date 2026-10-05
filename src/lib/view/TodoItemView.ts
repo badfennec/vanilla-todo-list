@@ -19,6 +19,8 @@ export interface TodoItemViewOptions {
  */
 export class TodoItemView {
   readonly element: HTMLLIElement;
+  /** Drag handle. The list view attaches the drag behavior to it. */
+  readonly handle: HTMLButtonElement;
   #item: TodoItem;
   readonly #icons: Readonly<TodoIcons>;
   readonly #onEdit: (id: string, text: string) => void;
@@ -41,7 +43,7 @@ export class TodoItemView {
     this.element = document.createElement('li');
     this.element.className = 'badfennec-todo__item';
 
-    const handle = createButton('badfennec-todo__handle', labels.drag, icons.grab);
+    this.handle = createButton('badfennec-todo__handle', labels.drag, icons.grab);
     this.#toggle = createButton('badfennec-todo__toggle', labels.toggle, '');
     const remove = createButton('badfennec-todo__delete', labels.delete, icons.delete);
 
@@ -53,7 +55,7 @@ export class TodoItemView {
     this.#text.setAttribute('aria-label', labels.text);
     this.#text.textContent = item.text;
 
-    this.element.append(handle, this.#toggle, this.#text, remove);
+    this.element.append(this.handle, this.#toggle, this.#text, remove);
     this.#renderCompleted();
 
     const { signal } = this.#listeners;

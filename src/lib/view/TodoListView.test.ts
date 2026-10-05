@@ -12,7 +12,7 @@ const C: TodoItem = { id: 'c', text: 'C', completed: true };
 function setup() {
   const root = document.createElement('div');
   document.body.append(root);
-  const callbacks = { onToggle: vi.fn(), onEdit: vi.fn(), onDelete: vi.fn(), onAdd: vi.fn() };
+  const callbacks = { onToggle: vi.fn(), onEdit: vi.fn(), onDelete: vi.fn(), onAdd: vi.fn(), onMove: vi.fn() };
   const view = new TodoListView({ root, icons: DEFAULT_ICONS, labels: DEFAULT_LABELS, ...callbacks });
 
   const list = (modifier: string): HTMLUListElement => {
@@ -160,5 +160,168 @@ describe('TodoListView', () => {
     expect(onAdd).not.toHaveBeenCalled();
     expect(root.classList.contains('badfennec-todo')).toBe(false);
     expect([...root.children]).toEqual([own]);
+  });
+
+  describe('drag and drop', () => {
+    const D: TodoItem = { id: 'd', text: 'D', completed: false };
+    // Active list at y=1000 (page coordinates); items 40px high with a 10px gap: middles at 20, 70, 120 (relative).
+    const LIST_TOP = 1000;
+
+    function setupDrag(items: readonly TodoItem[] = [A, B, D, C]) {
+      const context = setup();
+      context.view.render(items);
+
+      const rect = (top: number, height: number) => new DOMRect(0, top, 300, height);
+      context.list('active').getBoundingClientRect = () => rect(LIST_TOP, 140);
+      context.root.querySelectorAll<HTMLLIElement>('.badfennec-todo__item').forEach((item, index) => {
+        item.getBoundingClientRect = () => rect(LIST_TOP + index * 50, 40);
+      });
+      // Pointer capture is stubbed: the test DOM doesn't track it.
+      context.root.querySelectorAll<HTMLButtonElement>('.badfennec-todo__handle').forEach((handle) => {
+        handle.setPointerCapture = vi.fn();
+        handle.releasePointerCapture = vi.fn();
+        handle.hasPointerCapture = () => false;
+      });
+
+      const pointer = (index: number, type: string, clientY = 0): void => {
+        const handle = context.button(index, 'handle');
+        handle.dispatchEvent(new PointerEvent(type, { pointerId: 1, isPrimary: true, button: 0, clientY }));
+      };
+      const item = (index: number): HTMLLIElement => {
+        const element = context.root.querySelectorAll('.badfennec-todo__item').item(index);
+        if (!(element instanceof HTMLLIElement)) throw new Error(`item ${String(index)} not found`);
+        return element;
+      };
+      const placeholder = (): Element | null => context.root.querySelector('.badfennec-todo__placeholder');
+      const activeChildren = (): Element[] => [...context.list('active').children];
+
+      return { ...context, pointer, item, placeholder, activeChildren };
+    }
+
+    it('puts a placeholder in the slot of the dragged item and takes the item out of the flow', () => {
+      const { root, pointer, item, placeholder, activeChildren } = setupDrag();
+      const dragged = item(1);
+
+      pointer(1, 'pointerdown', 500);
+
+      expect(activeChildren()).toEqual([item(0), placeholder(), dragged, item(2)]);
+      expect(placeholder()?.getAttribute('aria-hidden')).toBe('true');
+      expect((placeholder() as HTMLElement).style.blockSize).toBe('40px');
+      expect(dragged.classList.contains('badfennec-todo__item--dragging')).toBe(true);
+      expect(dragged.style.top).toBe('50px');
+      expect(root.classList.contains('badfennec-todo--dragging')).toBe(true);
+    });
+
+    it('moves the placeholder once the dragged middle passes another middle', () => {
+      const { pointer, item, placeholder, activeChildren } = setupDrag();
+      const [a, b, d] = [item(0), item(1), item(2)];
+
+      pointer(0, 'pointerdown', 500);
+      pointer(0, 'pointermove', 549); // middle at 69: still before B
+      expect(activeChildren()).toEqual([placeholder(), a, b, d]);
+
+      pointer(0, 'pointermove', 551); // middle at 71: after B
+      expect(activeChildren()).toEqual([a, b, placeholder(), d]);
+
+      pointer(0, 'pointermove', 700); // past D: last
+      expect(activeChildren()).toEqual([a, b, d, placeholder()]);
+    });
+
+    it('reports the drop index and restores the DOM on pointer up', () => {
+      const { root, pointer, item, placeholder, activeChildren, onMove } = setupDrag();
+      const [a, b, d] = [item(0), item(1), item(2)];
+
+      pointer(2, 'pointerdown', 500);
+      pointer(2, 'pointermove', 400); // middle at 20: first
+      pointer(2, 'pointerup', 400);
+
+      expect(onMove).toHaveBeenCalledExactlyOnceWith('d', 0);
+      expect(placeholder()).toBeNull();
+      expect(activeChildren()).toEqual([a, b, d]);
+      expect(d.classList.contains('badfennec-todo__item--dragging')).toBe(false);
+      expect(d.style.top).toBe('');
+      expect(d.style.transform).toBe('');
+      expect(root.classList.contains('badfennec-todo--dragging')).toBe(false);
+    });
+
+    it('measures relative to the list, so the page position does not matter (A9)', () => {
+      const { pointer, onMove } = setupDrag();
+
+      pointer(0, 'pointerdown', 0);
+      pointer(0, 'pointermove', 51);
+      pointer(0, 'pointerup', 51);
+
+      expect(onMove).toHaveBeenCalledExactlyOnceWith('a', 1);
+    });
+
+    it('does not report a drop at the same index', () => {
+      const { pointer, onMove } = setupDrag();
+
+      pointer(1, 'pointerdown', 500);
+      pointer(1, 'pointermove', 510);
+      pointer(1, 'pointerup', 510);
+
+      expect(onMove).not.toHaveBeenCalled();
+    });
+
+    it('changes nothing when the drag is cancelled', () => {
+      const { pointer, placeholder, item, onMove } = setupDrag();
+
+      pointer(0, 'pointerdown', 500);
+      pointer(0, 'pointermove', 600);
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      pointer(0, 'pointerup', 600);
+
+      expect(onMove).not.toHaveBeenCalled();
+      expect(placeholder()).toBeNull();
+      expect(item(0).classList.contains('badfennec-todo__item--dragging')).toBe(false);
+    });
+
+    it('does not drag completed items', () => {
+      const { root, pointer, placeholder } = setupDrag();
+
+      pointer(3, 'pointerdown', 500);
+
+      expect(placeholder()).toBeNull();
+      expect(root.classList.contains('badfennec-todo--dragging')).toBe(false);
+    });
+
+    it('starts each drag from a clean state (A2)', () => {
+      const { pointer, onMove } = setupDrag();
+
+      pointer(0, 'pointerdown', 500);
+      pointer(0, 'pointermove', 610); // middle at 130: last
+      pointer(0, 'pointerup', 610);
+      pointer(1, 'pointerdown', 500);
+      pointer(1, 'pointerup', 500);
+
+      expect(onMove).toHaveBeenCalledExactlyOnceWith('a', 2);
+    });
+
+    it('cancels the drag when the items are rendered again', () => {
+      const { view, pointer, placeholder, item, onMove } = setupDrag();
+
+      pointer(0, 'pointerdown', 500);
+      pointer(0, 'pointermove', 600);
+      view.render([A, { ...B, text: 'B2' }, D, C]);
+      pointer(0, 'pointerup', 600);
+
+      expect(onMove).not.toHaveBeenCalled();
+      expect(placeholder()).toBeNull();
+      expect(item(0).classList.contains('badfennec-todo__item--dragging')).toBe(false);
+    });
+
+    it('stops the drag on destroy', () => {
+      const { view, root, pointer, onMove } = setupDrag();
+      const handle = root.querySelector('.badfennec-todo__handle');
+
+      pointer(0, 'pointerdown', 500);
+      view.destroy();
+      handle?.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1, isPrimary: true }));
+
+      expect(onMove).not.toHaveBeenCalled();
+      expect(root.querySelector('.badfennec-todo__placeholder')).toBeNull();
+      expect(root.classList.contains('badfennec-todo--dragging')).toBe(false);
+    });
   });
 });

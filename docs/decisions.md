@@ -178,3 +178,17 @@ inherit`); the demo imports Poppins. How the CSS is shipped to consumers is deci
   There is one controller per handle, created by the list view (step 5.3).
 - **Consequences:** The controller is reusable and testable without todos. Its state exists only during a drag and
   is cleared at the end (A2). `destroy()` stops a drag silently, without callbacks.
+
+## ADR-017 — Drag visuals: placeholder in the flow, dragged item absolute
+
+- **Date:** 2026-10-05 · **Status:** accepted
+- **Context:** The legacy drag sets `position: fixed` with cached page coordinates and pads neighbors by hand, which
+  breaks on scroll (A9) and leaves stale state (A2).
+- **Decision:** At drag start `TodoListView` measures the active items once, relative to the active list, inserts a
+  placeholder with the item's height in its slot, and takes the item out of the flow (`position: absolute` inside the
+  active list, from CSS; only `top` and the drag `transform` are set from JS). The drop index uses the middle of the
+  dragged item, not the pointer, because the handle is near the top of the item. On drop the DOM is restored and the
+  view reports `onMove(id, toIndex)`; the store applies it and the next render reorders the nodes. A `render()` during
+  a drag (e.g. a pending text edit applied) cancels the drag, so the DOM never drifts from the store.
+- **Consequences:** Scrolling the page before a drag doesn't matter. Scrolling during a drag and autoscroll near the
+  edges are not handled yet.

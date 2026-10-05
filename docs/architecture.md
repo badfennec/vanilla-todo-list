@@ -89,13 +89,15 @@ type TodoItem = { id: string; text: string; completed: boolean };
 1. `pointerdown` on an item handle (primary pointer and main button only; `canStart()` refuses completed items) makes
    `DragController` capture the pointer. There is one `DragController` per handle; it reports `onStart`,
    `onMove(offsetY)`, `onEnd(offsetY)` and `onCancel` and knows nothing about todos.
-2. At drag start `TodoListView` measures the active items' rects **once**, relative to the list container, so that
-   page scroll doesn't break them. It also inserts a placeholder.
+2. At drag start `TodoListView` measures the active items' rects **once**, relative to the active list, so that
+   page scroll doesn't break them. It inserts a placeholder (same height) in the item's slot and takes the item out of
+   the flow (`--dragging`: `position: absolute` in CSS, `top` set from JS).
 3. On `pointermove`, `DragController` translates the element, and `resolveDropIndex(y, spans, fromIndex)` gives the
-   target index. The view moves the placeholder there.
+   target index, with `y` the middle of the dragged item. The view moves the placeholder there.
 4. On `pointerup`, `TodoList` calls `store.move(id, index)` and the view re-renders. On `pointercancel`, lost pointer
    capture or `Escape`, nothing changes and the item returns to its place.
-5. All drag state lives in `DragController` for the duration of one drag and is reset at the end (fixes A2).
+5. Drag state exists only for the duration of one drag and is reset at the end (fixes A2): pointer state in
+   `DragController`, placeholder and measures in `TodoListView`. A `render()` during a drag cancels it.
 
 ## Adding an item from the UI
 
@@ -142,6 +144,7 @@ The item gap moves from a JS option (`itemsGap`) to the CSS custom property `--b
 | `badfennec-todo__item`, `--completed`, `--dragging` | One item row                                                |
 | `badfennec-todo__button`                            | Shared style of the icon `<button>`s                        |
 | `badfennec-todo__handle`, `__toggle`, `__delete`    | The item's drag handle, completion toggle and delete button |
+| `badfennec-todo__placeholder`                       | Keeps the slot of the dragged item                          |
 | `badfennec-todo__text`                              | The editable item text                                      |
 | `badfennec-todo__add`                               | The add-new-item row (one `<button>` with a visible label)  |
 | `badfennec-todo__icon`                              | Icon wrapper inside the add row                             |
