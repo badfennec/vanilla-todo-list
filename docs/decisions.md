@@ -246,3 +246,17 @@ inherit`); the demo imports Poppins. How the CSS is shipped to consumers is deci
 - **Consequences:** Item and drop index stay in sync with the pointer whatever scrolls. Each move reads the list rect
   once. Autoscroll near the edges is still missing (step 7.2); this supersedes the "scrolling during a drag is not
   handled" consequence of ADR-017.
+
+## ADR-022 — Autoscroll while dragging
+
+- **Date:** 2026-10-05 · **Status:** accepted
+- **Context:** Dragging to a position outside the visible area required scrolling with the wheel, which is impossible
+  on touch screens, where the handle has `touch-action: none` (A9).
+- **Decision:** While dragging, when the pointer is within 48 px of the top or bottom edge of the visible part of the
+  closest scrolling ancestor (or of the viewport, when the page scrolls), that container scrolls every animation frame,
+  up to 16 px per frame and faster closer to the edge. The zones shrink to a third of small containers. The math is in
+  pure functions (`autoScroll.ts`); `AutoScroller` runs the frame loop for one drag. `DragController` uses it behind
+  an `autoScroll` option, which `TodoListView` turns on. Positions stay in sync through the scroll handling of
+  ADR-021.
+- **Consequences:** Every position is reachable with mouse, touch and pen. The speed is per frame, so it is faster on
+  high refresh rate screens; acceptable for now. The scroll container is found once per drag.

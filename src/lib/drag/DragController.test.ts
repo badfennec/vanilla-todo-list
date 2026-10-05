@@ -170,6 +170,34 @@ describe('DragController', () => {
     expect(onMove).not.toHaveBeenCalled();
   });
 
+  it('autoscrolls near the viewport edges only when enabled, and stops at the end of the drag', () => {
+    vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'cancelAnimationFrame'] });
+    vi.stubGlobal('innerHeight', 600);
+    const scrollBy = vi.spyOn(window, 'scrollBy').mockImplementation(() => undefined);
+    try {
+      const plain = setup();
+      plain.pointer('pointerdown', { clientY: 300 });
+      plain.pointer('pointermove', { clientY: 600 });
+      vi.advanceTimersToNextFrame();
+      plain.pointer('pointerup', { clientY: 600 });
+      expect(scrollBy).not.toHaveBeenCalled();
+
+      const scrolling = setup({ autoScroll: true });
+      scrolling.pointer('pointerdown', { clientY: 300 });
+      scrolling.pointer('pointermove', { clientY: 600 });
+      vi.advanceTimersToNextFrame();
+      expect(scrollBy).toHaveBeenCalledExactlyOnceWith(0, 16);
+
+      scrolling.pointer('pointerup', { clientY: 600 });
+      vi.advanceTimersToNextFrame();
+      expect(scrollBy).toHaveBeenCalledOnce();
+    } finally {
+      vi.useRealTimers();
+      vi.unstubAllGlobals();
+      scrollBy.mockRestore();
+    }
+  });
+
   it('ignores Escape when no drag is in progress', () => {
     const { onCancel } = setup();
 

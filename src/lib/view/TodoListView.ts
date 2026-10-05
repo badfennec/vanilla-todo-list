@@ -202,6 +202,7 @@ export class TodoListView {
       element: view.element,
       // The dragged item is positioned inside the active list, so it scrolls with it.
       getReferenceTop: () => this.#activeList.getBoundingClientRect().top,
+      autoScroll: true,
       canStart: () => this.#active.some((active) => active.id === id),
       onStart: () => {
         this.#startDrag(id);

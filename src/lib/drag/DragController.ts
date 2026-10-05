@@ -1,3 +1,5 @@
+import { AutoScroller } from './AutoScroller';
+
 export interface DragControllerOptions {
   /** Element that starts the drag and captures the pointer. */
   readonly handle: HTMLElement;
@@ -8,6 +10,8 @@ export interface DragControllerOptions {
    * it, so the element stays under the pointer when the page scrolls during a drag. Defaults to the viewport.
    */
   readonly getReferenceTop?: () => number;
+  /** Scroll the closest scroll container (or the page) when the pointer gets near its top or bottom edge. */
+  readonly autoScroll?: boolean;
   /** Called on pointer down; returning `false` refuses the drag. */
   readonly canStart?: () => boolean;
   readonly onStart: () => void;
@@ -26,6 +30,7 @@ interface DragState {
   /** Last pointer position in the viewport, used again when the page scrolls without the pointer moving. */
   clientY: number;
   offsetY: number;
+  readonly autoScroller: AutoScroller | undefined;
   /** Removes the listeners added for this drag only. */
   readonly listeners: AbortController;
 }
@@ -74,6 +79,7 @@ export class DragController {
       startY: event.clientY - this.#referenceTop(),
       clientY: event.clientY,
       offsetY: 0,
+      autoScroller: this.#options.autoScroll ? new AutoScroller(handle) : undefined,
       listeners,
     };
 
@@ -98,6 +104,7 @@ export class DragController {
 
     drag.clientY = event.clientY;
     this.#move(drag);
+    drag.autoScroller?.update(event.clientY);
   };
 
   readonly #handleScroll = (): void => {
@@ -156,6 +163,7 @@ export class DragController {
     // Cleared first, so the `lostpointercapture` fired by the release below is ignored.
     this.#drag = undefined;
     drag.listeners.abort();
+    drag.autoScroller?.stop();
 
     const { handle, element } = this.#options;
     if (handle.hasPointerCapture(drag.pointerId)) {

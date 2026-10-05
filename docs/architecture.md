@@ -24,6 +24,8 @@ src/
     drag/
       DragController.ts       # pointer input on a handle: start / move / end / cancel
       resolveDropIndex.ts     # pure function: y + item spans + dragged index → target index
+      autoScroll.ts           # pure functions: edge scroll speed, closest scroll container
+      AutoScroller.ts         # animation-frame loop that scrolls while the pointer is near an edge
     styles/
       todo.css                # BEM classes + --bf-* custom properties
   demo/
@@ -46,6 +48,7 @@ in step 6.5.
 | `TodoItemView`     | One item's elements, a11y attributes, text input debounce                                 | Know its siblings or its parent |
 | `DragController`   | Pointer Events, pointer capture, visual translate of the dragged element                  | Compute the drop position       |
 | `resolveDropIndex` | Drop math (pure, unit-tested)                                                             | Read the DOM                    |
+| `AutoScroller`     | Scrolling the closest scroll container (or the page) near its edges during a drag         | Know about items or drop math   |
 | `TodoList`         | Validating options, composing the units, public API, `destroy()`                          | Contain business logic itself   |
 
 Rules:
@@ -100,7 +103,9 @@ type TodoItem = { id: string; text: string; completed: boolean };
    The view moves the placeholder there.
 4. On `pointerup`, `TodoList` calls `store.move(id, index)` and the view re-renders. On `pointercancel`, lost pointer
    capture or `Escape`, nothing changes and the item returns to its place.
-5. Drag state exists only for the duration of one drag and is reset at the end (fixes A2): pointer state in
+5. Near the top or bottom edge of the closest scroll container (or the page), `DragController` makes its
+   `AutoScroller` scroll every animation frame; the resulting `scroll` events update the drag as in step 3.
+6. Drag state exists only for the duration of one drag and is reset at the end (fixes A2): pointer state in
    `DragController`, placeholder and measures in `TodoListView`. A `render()` during a drag cancels it.
 
 ## Adding an item from the UI

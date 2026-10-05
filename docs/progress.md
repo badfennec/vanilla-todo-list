@@ -77,4 +77,4 @@ When a step is done:
 | Done | Step | Content                                                                      | Resolves | Suggested commit                        |
 | ---- | ---- | ---------------------------------------------------------------------------- | -------- | --------------------------------------- |
 | [x]  | 7.1  | Keep the drag in sync when the page scrolls during a drag                    | A9 (1/2) | `fix: keep drag in sync with scrolling` |
-| [ ]  | 7.2  | Autoscroll when dragging near the top or bottom edge of the scroll container | A9       | `feat: add autoscroll while dragging`   |
+| [x]  | 7.2  | Autoscroll when dragging near the top or bottom edge of the scroll container | A9       | `feat: add autoscroll while dragging`   |

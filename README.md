@@ -134,7 +134,8 @@ clash with existing ones. Two common patterns:
 
 ## Interaction
 
-- **Mouse, touch, pen:** drag an active item by its handle. `Escape` cancels the drag.
+- **Mouse, touch, pen:** drag an active item by its handle. `Escape` cancels the drag. Near the top or bottom edge of
+  the page (or of a scrolling container) the list scrolls by itself.
 - **Keyboard:** with the focus on a handle, `↑` / `↓` move the item by one position, `Home` / `End` to the first / last
   position. `Enter` in a text confirms it.
 - Completed items can't be reordered; they stay in completion order.
