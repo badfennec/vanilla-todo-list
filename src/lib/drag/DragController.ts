@@ -3,10 +3,15 @@ export interface DragControllerOptions {
   readonly handle: HTMLElement;
   /** Element translated vertically while dragging. */
   readonly element: HTMLElement;
+  /**
+   * Viewport top of the box the element moves with (e.g. its positioned container). Offsets are measured relative to
+   * it, so the element stays under the pointer when the page scrolls during a drag. Defaults to the viewport.
+   */
+  readonly getReferenceTop?: () => number;
   /** Called on pointer down; returning `false` refuses the drag. */
   readonly canStart?: () => boolean;
   readonly onStart: () => void;
-  /** `offsetY`: vertical pointer movement since the drag started, in pixels. */
+  /** `offsetY`: vertical pointer movement since the drag started, relative to the reference box, in pixels. */
   readonly onMove: (offsetY: number) => void;
   /** The pointer was released: the drop should be applied. */
   readonly onEnd: (offsetY: number) => void;
@@ -16,7 +21,10 @@ export interface DragControllerOptions {
 
 interface DragState {
   readonly pointerId: number;
+  /** Pointer position relative to the reference box when the drag started. */
   readonly startY: number;
+  /** Last pointer position in the viewport, used again when the page scrolls without the pointer moving. */
+  clientY: number;
   offsetY: number;
   /** Removes the listeners added for this drag only. */
   readonly listeners: AbortController;
@@ -61,7 +69,13 @@ export class DragController {
     const { handle } = this.#options;
     const listeners = new AbortController();
     const { signal } = listeners;
-    this.#drag = { pointerId: event.pointerId, startY: event.clientY, offsetY: 0, listeners };
+    this.#drag = {
+      pointerId: event.pointerId,
+      startY: event.clientY - this.#referenceTop(),
+      clientY: event.clientY,
+      offsetY: 0,
+      listeners,
+    };
 
     // With capture, move/up/cancel reach the handle even when the pointer leaves it.
     handle.setPointerCapture(event.pointerId);
@@ -70,6 +84,8 @@ export class DragController {
     handle.addEventListener('pointercancel', this.#handleInterrupt, { signal });
     handle.addEventListener('lostpointercapture', this.#handleInterrupt, { signal });
     document.addEventListener('keydown', this.#handleKeyDown, { signal });
+    // Scroll events don't bubble: capturing on the document catches the page and any scrolling ancestor.
+    document.addEventListener('scroll', this.#handleScroll, { signal, capture: true, passive: true });
 
     this.#options.onStart();
   };
@@ -80,9 +96,14 @@ export class DragController {
       return;
     }
 
-    drag.offsetY = event.clientY - drag.startY;
-    this.#options.element.style.transform = `translate3d(0, ${String(drag.offsetY)}px, 0)`;
-    this.#options.onMove(drag.offsetY);
+    drag.clientY = event.clientY;
+    this.#move(drag);
+  };
+
+  readonly #handleScroll = (): void => {
+    if (this.#drag) {
+      this.#move(this.#drag);
+    }
   };
 
   readonly #handlePointerUp = (event: PointerEvent): void => {
@@ -109,6 +130,16 @@ export class DragController {
       this.#cancel();
     }
   };
+
+  #move(drag: DragState): void {
+    drag.offsetY = drag.clientY - this.#referenceTop() - drag.startY;
+    this.#options.element.style.transform = `translate3d(0, ${String(drag.offsetY)}px, 0)`;
+    this.#options.onMove(drag.offsetY);
+  }
+
+  #referenceTop(): number {
+    return this.#options.getReferenceTop?.() ?? 0;
+  }
 
   #cancel(): void {
     this.#stop();

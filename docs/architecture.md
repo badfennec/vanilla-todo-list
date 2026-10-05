@@ -94,8 +94,10 @@ type TodoItem = { id: string; text: string; completed: boolean };
 2. At drag start `TodoListView` measures the active items' rects **once**, relative to the active list, so that
    page scroll doesn't break them. It inserts a placeholder (same height) in the item's slot and takes the item out of
    the flow (`--dragging`: `position: absolute` in CSS, `top` set from JS).
-3. On `pointermove`, `DragController` translates the element, and `resolveDropIndex(y, spans, fromIndex)` gives the
-   target index, with `y` the middle of the dragged item. The view moves the placeholder there.
+3. On `pointermove`, and on `scroll` while dragging, `DragController` translates the element by the pointer offset
+   measured relative to the active list (`getReferenceTop`), so the item stays under the pointer when the page
+   scrolls. `resolveDropIndex(y, spans, fromIndex)` gives the target index, with `y` the middle of the dragged item.
+   The view moves the placeholder there.
 4. On `pointerup`, `TodoList` calls `store.move(id, index)` and the view re-renders. On `pointercancel`, lost pointer
    capture or `Escape`, nothing changes and the item returns to its place.
 5. Drag state exists only for the duration of one drag and is reset at the end (fixes A2): pointer state in

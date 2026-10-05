@@ -142,6 +142,34 @@ describe('DragController', () => {
     expect(element.style.transform).toBe('');
   });
 
+  it('measures offsets relative to the reference box, also when the page scrolls (A9)', () => {
+    let referenceTop = 0;
+    const { element, pointer, onMove, onEnd } = setup({ getReferenceTop: () => referenceTop });
+
+    pointer('pointerdown', { clientY: 100 });
+    referenceTop = -50; // the page scrolled down by 50px, the pointer didn't move
+    document.dispatchEvent(new Event('scroll'));
+    expect(onMove).toHaveBeenLastCalledWith(50);
+    expect(element.style.transform).toBe('translate3d(0, 50px, 0)');
+
+    pointer('pointermove', { clientY: 80 });
+    expect(onMove).toHaveBeenLastCalledWith(30);
+
+    pointer('pointerup', { clientY: 80 });
+    expect(onEnd).toHaveBeenCalledExactlyOnceWith(30);
+  });
+
+  it('ignores scrolling when no drag is in progress', () => {
+    const { pointer, onMove } = setup({ getReferenceTop: () => 0 });
+
+    document.dispatchEvent(new Event('scroll'));
+    pointer('pointerdown', { clientY: 100 });
+    pointer('pointerup', { clientY: 100 });
+    document.dispatchEvent(new Event('scroll'));
+
+    expect(onMove).not.toHaveBeenCalled();
+  });
+
   it('ignores Escape when no drag is in progress', () => {
     const { onCancel } = setup();
 

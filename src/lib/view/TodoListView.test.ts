@@ -174,7 +174,9 @@ describe('TodoListView', () => {
       context.view.render(items);
 
       const rect = (top: number, height: number) => new DOMRect(0, top, 300, height);
-      context.list('active').getBoundingClientRect = () => rect(LIST_TOP, 140);
+      // Mutable, to simulate the page scrolling during a drag.
+      let listTop = LIST_TOP;
+      context.list('active').getBoundingClientRect = () => rect(listTop, 140);
       context.root.querySelectorAll<HTMLLIElement>('.badfennec-todo__item').forEach((item, index) => {
         item.getBoundingClientRect = () => rect(LIST_TOP + index * 50, 40);
       });
@@ -197,7 +199,12 @@ describe('TodoListView', () => {
       const placeholder = (): Element | null => context.root.querySelector('.badfennec-todo__placeholder');
       const activeChildren = (): Element[] => [...context.list('active').children];
 
-      return { ...context, pointer, item, placeholder, activeChildren };
+      const scrollPage = (distance: number): void => {
+        listTop -= distance;
+        document.dispatchEvent(new Event('scroll'));
+      };
+
+      return { ...context, pointer, item, placeholder, activeChildren, scrollPage };
     }
 
     it('puts a placeholder in the slot of the dragged item and takes the item out of the flow', () => {
@@ -253,6 +260,19 @@ describe('TodoListView', () => {
       pointer(0, 'pointermove', 51);
       pointer(0, 'pointerup', 51);
 
+      expect(onMove).toHaveBeenCalledExactlyOnceWith('a', 1);
+    });
+
+    it('keeps the drop position in sync when the page scrolls during a drag (A9)', () => {
+      const { pointer, item, placeholder, activeChildren, scrollPage, onMove } = setupDrag();
+      const [a, b, d] = [item(0), item(1), item(2)];
+
+      pointer(0, 'pointerdown', 500);
+      scrollPage(60); // the pointer stays still, the list moves up: middle at 80, after B
+      expect(activeChildren()).toEqual([a, b, placeholder(), d]);
+      expect(a.style.transform).toBe('translate3d(0, 60px, 0)');
+
+      pointer(0, 'pointerup', 500);
       expect(onMove).toHaveBeenCalledExactlyOnceWith('a', 1);
     });
 

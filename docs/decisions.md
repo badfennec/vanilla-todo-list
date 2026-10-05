@@ -232,3 +232,17 @@ inherit`); the demo imports Poppins. How the CSS is shipped to consumers is deci
 - **Consequences:** Works with any bundler and with `<script type="module">` / `<link>` without one. No UMD build for
   classic `<script>` users. The package stays `private` until a release is decided. `npm run build` no longer builds
   the legacy demo; the demo build comes back in step 6.3.
+
+## ADR-021 — Drag offsets relative to the list, updated on scroll
+
+- **Date:** 2026-10-05 · **Status:** accepted
+- **Context:** `DragController` measured `offsetY` as a viewport `clientY` delta (ADR-016), while the dragged item is
+  positioned inside the active list and the drop spans are list-relative (ADR-017). When the page scrolled during a
+  drag (wheel, trackpad, keyboard), the item drifted away from the pointer and the drop index was off (A9).
+- **Decision:** `DragController` takes an optional `getReferenceTop()` (the viewport top of the box the element moves
+  with) and measures `offsetY` as the change of the pointer position relative to it. During a drag it also listens to
+  `scroll` (captured on the document, passive) and recomputes the offset with the last pointer position.
+  `TodoListView` passes the active list's top. Without the option the reference is the viewport, as before.
+- **Consequences:** Item and drop index stay in sync with the pointer whatever scrolls. Each move reads the list rect
+  once. Autoscroll near the edges is still missing (step 7.2); this supersedes the "scrolling during a drag is not
+  handled" consequence of ADR-017.

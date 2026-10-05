@@ -71,3 +71,10 @@ When a step is done:
 | [x]  | 6.3  | `src/demo/main.ts` (imports the font), new `index.html`, favicon fix | C6, A10  | `feat: add new demo app`                 |
 | [x]  | 6.4  | README rewrite + migration notes                                     | D4, C5   | `docs: rewrite readme for new api`       |
 | [x]  | 6.5  | Remove legacy `badfennec-todo/` and `assets/js/`                     | D2       | `refactor: remove legacy implementation` |
+
+## Phase 7 — Follow-ups
+
+| Done | Step | Content                                                                      | Resolves | Suggested commit                        |
+| ---- | ---- | ---------------------------------------------------------------------------- | -------- | --------------------------------------- |
+| [x]  | 7.1  | Keep the drag in sync when the page scrolls during a drag                    | A9 (1/2) | `fix: keep drag in sync with scrolling` |
+| [ ]  | 7.2  | Autoscroll when dragging near the top or bottom edge of the scroll container | A9       | `feat: add autoscroll while dragging`   |
