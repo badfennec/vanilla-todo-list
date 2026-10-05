@@ -1,6 +1,5 @@
 import type { TodoIcons, TodoItem, TodoLabels } from '../model/types';
-
-const DEFAULT_EDIT_DELAY = 300;
+import { EditableText } from './EditableText';
 
 export interface TodoItemViewOptions {
   readonly item: TodoItem;
@@ -15,7 +14,7 @@ export interface TodoItemViewOptions {
 
 /**
  * DOM of a single item. It only renders the item it is given and reports user intents through callbacks:
- * it never changes the item itself.
+ * it never changes the item itself. Text editing is delegated to `EditableText`.
  */
 export class TodoItemView {
   readonly element: HTMLLIElement;
@@ -23,22 +22,15 @@ export class TodoItemView {
   readonly handle: HTMLButtonElement;
   #item: TodoItem;
   readonly #icons: Readonly<TodoIcons>;
-  readonly #onEdit: (id: string, text: string) => void;
-  readonly #onDelete: (id: string) => void;
-  readonly #editDelay: number;
   readonly #toggle: HTMLButtonElement;
-  readonly #text: HTMLDivElement;
+  readonly #text: EditableText;
   readonly #listeners = new AbortController();
-  #editTimer: ReturnType<typeof setTimeout> | undefined;
   /** Set by `editAsNew()`: the item is deleted if its text is still empty when the user leaves it. */
   #discardIfEmpty = false;
 
   constructor({ item, icons, labels, onToggle, onEdit, onDelete, editDelay }: TodoItemViewOptions) {
     this.#item = item;
     this.#icons = icons;
-    this.#onEdit = onEdit;
-    this.#onDelete = onDelete;
-    this.#editDelay = editDelay ?? DEFAULT_EDIT_DELAY;
 
     this.element = document.createElement('li');
     this.element.className = 'badfennec-todo__item';
@@ -46,16 +38,23 @@ export class TodoItemView {
     this.handle = createButton('badfennec-todo__handle', labels.drag, icons.grab);
     this.#toggle = createButton('badfennec-todo__toggle', labels.toggle, '');
     const remove = createButton('badfennec-todo__delete', labels.delete, icons.delete);
+    this.#text = new EditableText({
+      label: labels.text,
+      value: item.text,
+      delay: editDelay,
+      onChange: (text) => {
+        onEdit(this.#item.id, text);
+      },
+      onLeave: (text) => {
+        const discard = this.#discardIfEmpty && text === '';
+        this.#discardIfEmpty = false;
+        if (discard) {
+          onDelete(this.#item.id);
+        }
+      },
+    });
 
-    this.#text = document.createElement('div');
-    this.#text.className = 'badfennec-todo__text';
-    // plaintext-only: pasted content is inserted as plain text, never as markup.
-    this.#text.setAttribute('contenteditable', 'plaintext-only');
-    this.#text.setAttribute('role', 'textbox');
-    this.#text.setAttribute('aria-label', labels.text);
-    this.#text.textContent = item.text;
-
-    this.element.append(this.handle, this.#toggle, this.#text, remove);
+    this.element.append(this.handle, this.#toggle, this.#text.element, remove);
     this.#renderCompleted();
 
     const { signal } = this.#listeners;
@@ -69,32 +68,7 @@ export class TodoItemView {
     remove.addEventListener(
       'click',
       () => {
-        this.#onDelete(this.#item.id);
-      },
-      { signal },
-    );
-    this.#text.addEventListener(
-      'input',
-      () => {
-        this.#scheduleEdit();
-      },
-      { signal },
-    );
-    this.#text.addEventListener(
-      'blur',
-      () => {
-        this.#leaveText();
-      },
-      { signal },
-    );
-    this.#text.addEventListener(
-      'keydown',
-      (event) => {
-        // Items are single paragraphs: Enter confirms the text instead of adding a line break.
-        if (event.key === 'Enter' && !event.isComposing) {
-          event.preventDefault();
-          this.#text.blur();
-        }
+        onDelete(this.#item.id);
       },
       { signal },
     );
@@ -108,10 +82,7 @@ export class TodoItemView {
     if (completedChanged) {
       this.#renderCompleted();
     }
-    // Rewriting the text while the user is typing would move the caret; their pending edit wins anyway.
-    if (document.activeElement !== this.#text && this.#text.textContent !== item.text) {
-      this.#text.textContent = item.text;
-    }
+    this.#text.setValue(item.text);
   }
 
   /**
@@ -125,8 +96,7 @@ export class TodoItemView {
 
   /** Removes the element and its listeners. A pending text change is dropped, not reported (fixes A3). */
   destroy(): void {
-    clearTimeout(this.#editTimer);
-    this.#editTimer = undefined;
+    this.#text.destroy();
     this.#listeners.abort();
     this.element.remove();
   }
@@ -136,38 +106,6 @@ export class TodoItemView {
     this.element.classList.toggle('badfennec-todo__item--completed', completed);
     this.#toggle.setAttribute('aria-pressed', String(completed));
     this.#toggle.innerHTML = completed ? this.#icons.checked : this.#icons.unchecked;
-  }
-
-  #leaveText(): void {
-    this.#flushEdit();
-
-    const discard = this.#discardIfEmpty && this.#readText() === '';
-    this.#discardIfEmpty = false;
-    if (discard) {
-      this.#onDelete(this.#item.id);
-    }
-  }
-
-  #scheduleEdit(): void {
-    clearTimeout(this.#editTimer);
-    this.#editTimer = setTimeout(() => {
-      this.#flushEdit();
-    }, this.#editDelay);
-  }
-
-  #flushEdit(): void {
-    clearTimeout(this.#editTimer);
-    this.#editTimer = undefined;
-
-    const text = this.#readText();
-    if (text !== this.#item.text) {
-      this.#onEdit(this.#item.id, text);
-    }
-  }
-
-  #readText(): string {
-    // Pasted text can still contain line breaks: keep the item on one paragraph.
-    return this.#text.textContent.replace(/[\r\n]+/g, ' ');
   }
 }
 

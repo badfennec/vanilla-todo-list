@@ -19,6 +19,7 @@ src/
     view/
       TodoListView.ts         # renders the containers and keeps item views in sync with the store
       TodoItemView.ts         # DOM of a single item, reports user intents through callbacks
+      EditableText.ts         # single-paragraph contenteditable with debounced change reports
       DragSession.ts          # visual state of one drag: measures, placeholder, drop index
       icons.ts                # default SVG icons
       labels.ts               # default texts and accessible names, fillLabel() for {placeholders}
@@ -50,7 +51,8 @@ in step 6.5.
 | `TodoListView`     | Containers, creating/removing/reordering item views from store state, wiring drags        | Decide order or mutate data     |
 | `DragSession`      | One drag's measures, placeholder and drop index (created at start, finished at the end)   | Handle pointer input            |
 | `Announcer`        | The live region and its text                                                              | Know what is announced or why   |
-| `TodoItemView`     | One item's elements, a11y attributes, text input debounce                                 | Know its siblings or its parent |
+| `TodoItemView`     | One item's elements and a11y attributes; discarding a new item left empty                 | Know its siblings or its parent |
+| `EditableText`     | The editable text: plain-text input, Enter, debounced `onChange`, `onLeave`               | Know about todos                |
 | `DragController`   | Pointer Events, pointer capture, visual translate of the dragged element                  | Compute the drop position       |
 | `resolveDropIndex` | Drop math (pure, unit-tested)                                                             | Read the DOM                    |
 | `AutoScroller`     | Scrolling the closest scroll container (or the page) near its edges during a drag         | Know about items or drop math   |

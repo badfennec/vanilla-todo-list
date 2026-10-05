@@ -294,3 +294,18 @@ inherit`); the demo imports Poppins. How the CSS is shipped to consumers is deci
   `view/labels.ts`. `TodoListView` only finds the focused handle, prevents the default action and wires these
   together. Behavior is unchanged (ADR-018).
 - **Consequences:** Each part is unit-tested on its own; `TodoListView` keeps containers, reconciliation and wiring.
+
+## ADR-026 — `EditableText` out of `TodoItemView`
+
+- **Date:** 2026-10-05 · **Status:** accepted
+- **Context:** `TodoItemView` had two reasons to change: how an item is shown (buttons, completed state, icons) and
+  how a text is edited (debounce, blur, Enter, pasted line breaks). Text editing is where new requests are most
+  likely (e.g. Escape to undo, a length limit).
+- **Decision:** Text editing moves to `view/EditableText.ts`, which knows nothing about todos: `label`, `value`,
+  optional `delay` (300 ms), `onChange(text)` (after a pause or on blur, only when the text differs from the current
+  value) and `onLeave(text)` (on blur, after `onChange`); `setValue()` (not applied while focused), `focus()`,
+  `destroy()` (drops a pending change). Its value always comes from the owner, so the store stays the source of truth.
+  `TodoItemView` keeps the item rules: it maps `onChange` to `onEdit(id, text)` and, in `onLeave`, deletes an item
+  added from the UI and left empty (ADR-014). The editing behavior of ADR-013 is unchanged.
+- **Consequences:** `TodoItemView` goes from 183 to about 120 lines; text editing is unit-tested on its own. The
+  current text is held both by the store and, as a copy for comparison, by `EditableText`.
