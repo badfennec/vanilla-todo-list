@@ -70,4 +70,4 @@ When a step is done:
 | [x]  | 6.2  | Library build (Vite lib mode) + `package.json` exports               | D1       | `chore: configure library build`         |
 | [x]  | 6.3  | `src/demo/main.ts` (imports the font), new `index.html`, favicon fix | C6, A10  | `feat: add new demo app`                 |
 | [x]  | 6.4  | README rewrite + migration notes                                     | D4, C5   | `docs: rewrite readme for new api`       |
-| [ ]  | 6.5  | Remove legacy `badfennec-todo/` and `assets/js/`                     | D2       | `refactor: remove legacy implementation` |
+| [x]  | 6.5  | Remove legacy `badfennec-todo/` and `assets/js/`                     | D2       | `refactor: remove legacy implementation` |

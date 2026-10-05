@@ -31,7 +31,8 @@ src/
     demo.css                  # demo page layout and theme overrides
 ```
 
-The legacy code (`badfennec-todo/`, `assets/js/`) stays untouched as a reference and is removed in the last phase.
+The legacy vanilla JS code (`badfennec-todo/`, `assets/js/`) was kept as a reference during the refactor and removed
+in step 6.5.
 
 ## Responsibilities
 

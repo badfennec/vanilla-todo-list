@@ -1,8 +1,8 @@
 # BadFennec Todo
 
-A dependency-light todo list library with a custom drag & drop engine (mouse + touch), plus a small demo app.
-The project is being **refactored** from the legacy vanilla JS code (`badfennec-todo/`, `assets/js/`) into a
-TypeScript library under `src/` with a redesigned public API.
+A dependency-free TypeScript todo list library with a custom drag & drop engine (Pointer Events), plus a small demo
+app. It was refactored from a legacy vanilla JS version (removed in step 6.5; see `docs/audit.md` and
+`docs/decisions.md` for the history).
 
 ## Working rules (mandatory)
 
@@ -33,10 +33,9 @@ TypeScript library under `src/` with a redesigned public API.
 
 ## Repository layout
 
-- `badfennec-todo/`: **legacy** library (vanilla JS). Use it as a reference only, never extend it. It is removed in the last phase.
-- `assets/js/app.js`: **legacy** demo entry.
-- `src/lib/`: new TypeScript library (target).
-- `src/demo/`: new demo app (target).
+- `src/lib/`: the library (`index.ts` is the public entry, `buildEntry.ts` the Vite build entry).
+- `src/demo/`: the demo app (`index.html` at the root loads it).
+- `public/`: static assets of the demo (favicon).
 - `docs/`: audit, architecture, decisions, progress.
 - `.claude/`: Claude settings and project skills.
 

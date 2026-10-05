@@ -4,8 +4,7 @@ import { defineConfig, globalIgnores } from 'eslint/config';
 import tseslint from 'typescript-eslint';
 
 export default defineConfig(
-  // Legacy code is a reference only and is removed in step 6.5.
-  globalIgnores(['dist/', 'dist-demo/', 'badfennec-todo/', 'assets/']),
+  globalIgnores(['dist/', 'dist-demo/']),
 
   js.configs.recommended,
 

@@ -24,7 +24,7 @@ Status: `open` until the refactor step that resolves it is done, then `resolved 
 
 | ID  | Problem                                                                                                                                                                                                       | Status              |
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
-| B1  | **The DOM is the source of truth.** `sort.js` rebuilds the array order from `getBoundingClientRect()`. No model/view separation.                                                                              | open                |
+| B1  | **The DOM is the source of truth.** `sort.js` rebuilds the array order from `getBoundingClientRect()`. No model/view separation.                                                                              | resolved (step 3.4) |
 | B2  | **God object** `BadFennecTodo`: it owns state, drag state (`delta`, `dragY`, `draggingItem`), DOM creation, events and the completed-container logic.                                                         | resolved (step 6.1) |
 | B3  | **Circular coupling**: `TodoItem`, `DragEvents` and `DragIntersector` all receive the parent `ToDo` and read and write its internals (`draggingItem`, `el.style.cursor`, `items`, `dragY`…).                  | resolved (step 5.2) |
 | B4  | **Fake reactivity**: `Reactive` is a misused event bus. Its `value` is never read, state is duplicated three times (`text` / `oldText` / `reactive.value.text`), and `subscribe` fires immediately.           | resolved (step 3.4) |
@@ -32,10 +32,10 @@ Status: `open` until the refactor step that resolves it is done, then `resolved 
 | B6  | `Sorting`: a class created on every drag end that shallow-copies a class instance (`{...draggingItem}`) only to compare `startY`.                                                                             | resolved (step 3.6) |
 | B7  | `DOMHandler`: a class with no state. It should be a view, or plain functions.                                                                                                                                 | resolved (step 4.3) |
 | B8  | Constructors with 15+ loose arguments (`TodoItem`). Defaults (icons) are scattered across 3 files.                                                                                                            | resolved (step 4.2) |
-| B9  | Everything is public and mutable. Dead code: `rect`, `draggingItemOriginY`, `index`/`setIndex`, `middleHeight`, `marginBottom`, `spaceAvailableHeight`, the unused `deltaY` in `#move`, commented-out blocks. | open                |
+| B9  | Everything is public and mutable. Dead code: `rect`, `draggingItemOriginY`, `index`/`setIndex`, `middleHeight`, `marginBottom`, `spaceAvailableHeight`, the unused `deltaY` in `#move`, commented-out blocks. | resolved (step 3.1) |
 | B10 | Misleading names: the "deltaY" passed around is actually the absolute `clientY`. `onUpdate` means toggle.                                                                                                     | resolved (step 5.1) |
 | B11 | The public API is only `on()`. Missing: `add`, `remove`, `getItems`, `setItems`, `destroy`, `off`.                                                                                                            | resolved (step 6.1) |
-| B12 | No input validation: a selector that matches nothing crashes later with an unclear error.                                                                                                                     | open                |
+| B12 | No input validation: a selector that matches nothing crashes later with an unclear error.                                                                                                                     | resolved (step 6.1) |
 
 ## C. UI / accessibility / CSS
 
@@ -43,7 +43,7 @@ Status: `open` until the refactor step that resolves it is done, then `resolved 
 | --- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
 | C1  | Buttons are `<div>`s: no `role`, `tabindex`, `aria-label` or `aria-checked`, no keyboard support (including keyboard reordering).         | resolved (step 5.4) |
 | C2  | `contentEditable=true` with no Enter handling and no paste sanitization (use `plaintext-only` or an `<input>`).                           | resolved (step 4.2) |
-| C3  | Inline styles set from JS (`flexGrow`, `outline`, `cursor`, `marginBottom` for the gap). They belong in CSS (custom property `--bf-gap`). | open                |
+| C3  | Inline styles set from JS (`flexGrow`, `outline`, `cursor`, `marginBottom` for the gap). They belong in CSS (custom property `--bf-gap`). | resolved (step 4.3) |
 | C4  | Hardcoded colors, no CSS variables or theming. Dead CSS: `.badfennec-todo__item--intersected`.                                            | resolved (step 4.1) |
 | C5  | `innerHTML` with consumer-provided SVG strings is an XSS surface. Document it, or accept `SVGElement`.                                    | resolved (step 6.4) |
 | C6  | The library itself imports `@fontsource/poppins`, forcing a font on consumers (and contradicting the "zero dependencies" claim).          | resolved (step 6.3) |
@@ -53,6 +53,6 @@ Status: `open` until the refactor step that resolves it is done, then `resolved 
 | ID  | Problem                                                                                                                                                                 | Status              |
 | --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
 | D1  | `package.json` name is `"01"`. `vite.config.js` is in `.gitignore`. No lib-mode build, even though the README presents the project as a library.                        | resolved (step 6.2) |
-| D2  | Non-standard layout (`badfennec-todo/` at the root, app in `assets/js/`). Inconsistent imports (`./icons` vs `./icons.js`) and icon names (`CheckedIcon` vs `addIcon`). | open                |
+| D2  | Non-standard layout (`badfennec-todo/` at the root, app in `assets/js/`). Inconsistent imports (`./icons` vs `./icons.js`) and icon names (`CheckedIcon` vs `addIcon`). | resolved (step 6.5) |
 | D3  | No linter, formatter, types or tests.                                                                                                                                   | resolved (step 2.6) |
 | D4  | README: the `const icons: {` example has a syntax error, there is a "toogle" typo, code blocks are tagged `bash`, and the clone URL doesn't match the repo.             | resolved (step 6.4) |
