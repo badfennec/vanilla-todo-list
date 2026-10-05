@@ -164,3 +164,17 @@ inherit`); the demo imports Poppins. How the CSS is shipped to consumers is deci
 - **Consequences:** The index is a monotonic function of `y`, so it can't flicker while the placeholder shifts items on
   screen, and the function has no state to reset. It assumes the layout doesn't change during a drag (no reflow
   from other sources); scroll is handled by measuring relative to the container.
+
+## ADR-016 — One generic `DragController` per handle
+
+- **Date:** 2026-10-05 · **Status:** accepted
+- **Context:** The legacy drag classes receive the parent `ToDo` and read and write its internals (B3), handle mouse
+  and touch separately, and have no cancel path (A4).
+- **Decision:** `DragController` takes a handle, the element to translate and callbacks (`canStart`, `onStart`,
+  `onMove(offsetY)`, `onEnd(offsetY)`, `onCancel`). It uses Pointer Events with pointer capture, accepts only the
+  primary pointer with the main button, and cancels on `pointercancel`, lost capture or `Escape`. Its only DOM write is
+  the `transform` of the dragged element; drag classes (`--dragging`) are set by the view through the callbacks.
+  `offsetY` is the pointer movement since the start, so the caller adds it to positions it measured at start.
+  There is one controller per handle, created by the list view (step 5.3).
+- **Consequences:** The controller is reusable and testable without todos. Its state exists only during a drag and
+  is cleared at the end (A2). `destroy()` stops a drag silently, without callbacks.

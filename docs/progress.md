@@ -58,7 +58,7 @@ When a step is done:
 | Done | Step | Content                                                                                  | Resolves   | Suggested commit                    |
 | ---- | ---- | ---------------------------------------------------------------------------------------- | ---------- | ----------------------------------- |
 | [x]  | 5.1  | `drag/resolveDropIndex.ts` (pure) + tests                                                | B10        | `feat: add drop index resolver`     |
-| [ ]  | 5.2  | `drag/DragController.ts` (Pointer Events, capture, cancel, primary button only)          | A4, A5, B3 | `feat: add pointer drag controller` |
+| [x]  | 5.2  | `drag/DragController.ts` (Pointer Events, capture, cancel, primary button only)          | A4, A5, B3 | `feat: add pointer drag controller` |
 | [ ]  | 5.3  | Placeholder in `TodoListView` + wire drag to `store.move()`, rects relative to container | A2, A9     | `feat: wire drag and drop to store` |
 | [ ]  | 5.4  | Keyboard reordering (decide the keys first)                                              | C1         | `feat: add keyboard reordering`     |
 

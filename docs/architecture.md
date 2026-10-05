@@ -86,13 +86,15 @@ type TodoItem = { id: string; text: string; completed: boolean };
 
 ## Drag & drop flow
 
-1. `pointerdown` on an item handle (primary button only, active items only) makes `DragController` capture the pointer.
+1. `pointerdown` on an item handle (primary pointer and main button only; `canStart()` refuses completed items) makes
+   `DragController` capture the pointer. There is one `DragController` per handle; it reports `onStart`,
+   `onMove(offsetY)`, `onEnd(offsetY)` and `onCancel` and knows nothing about todos.
 2. At drag start `TodoListView` measures the active items' rects **once**, relative to the list container, so that
    page scroll doesn't break them. It also inserts a placeholder.
 3. On `pointermove`, `DragController` translates the element, and `resolveDropIndex(y, spans, fromIndex)` gives the
    target index. The view moves the placeholder there.
-4. On `pointerup`, `TodoList` calls `store.move(id, index)` and the view re-renders. On `pointercancel` or `Escape`,
-   nothing changes and the item returns to its place.
+4. On `pointerup`, `TodoList` calls `store.move(id, index)` and the view re-renders. On `pointercancel`, lost pointer
+   capture or `Escape`, nothing changes and the item returns to its place.
 5. All drag state lives in `DragController` for the duration of one drag and is reset at the end (fixes A2).
 
 ## Adding an item from the UI
