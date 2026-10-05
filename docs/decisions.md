@@ -309,3 +309,14 @@ inherit`); the demo imports Poppins. How the CSS is shipped to consumers is deci
   added from the UI and left empty (ADR-014). The editing behavior of ADR-013 is unchanged.
 - **Consequences:** `TodoItemView` goes from 183 to about 120 lines; text editing is unit-tested on its own. The
   current text is held both by the store and, as a copy for comparison, by `EditableText`.
+
+## ADR-027 — Vercel deploys the demo, configured in `vercel.json`
+
+- **Date:** 2026-10-05 · **Status:** accepted
+- **Context:** The repository is connected to Vercel, which used the Vite defaults: `npm run build` and the `dist/`
+  folder. Since ADR-020 that command builds the library, so `dist/` has no `index.html` and the deployed URL started a
+  download instead of showing the demo.
+- **Decision:** A `vercel.json` at the root sets `buildCommand` to `npm run build:demo` and `outputDirectory` to
+  `dist-demo`. The scripts stay as they are (`build` = library, `build:demo` = site).
+- **Consequences:** The deploy configuration is versioned with the code and overrides the dashboard settings. Any
+  change to the demo build (command or folder) must update `vercel.json` too.

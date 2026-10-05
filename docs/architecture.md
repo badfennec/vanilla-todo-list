@@ -167,7 +167,8 @@ The item gap moves from a JS option (`itemsGap`) to the CSS custom property `--b
 | `dist/index.d.ts` (+ per module) | `src/lib/index.ts`                              | `types`                    |
 
 `npm run build:demo` (`vite build --mode demo`) builds the demo page (`index.html` → `src/demo/main.ts`) into
-`dist-demo/`; `npm run preview` serves it.
+`dist-demo/`; `npm run preview` serves it. Vercel deploys the demo from the same command and folder, as set in
+`vercel.json` (ADR-027).
 
 Consumers import the stylesheet themselves (`import 'badfennec-todo/style.css'` or a `<link>`), or write their own theme.
 
