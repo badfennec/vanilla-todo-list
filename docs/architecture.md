@@ -118,6 +118,23 @@ todo.destroy();
 
 The item gap moves from a JS option (`itemsGap`) to the CSS custom property `--bf-gap`.
 
+## CSS classes and custom properties
+
+`styles/todo.css` uses flat BEM selectors. Every visual value is a `--bf-*` custom property declared on
+`.badfennec-todo` (see ADR-012). Views only toggle these classes; the only inline style is the drag `transform`.
+
+| Class                                               | Element                                                     |
+| --------------------------------------------------- | ----------------------------------------------------------- |
+| `badfennec-todo`, `--dragging`                      | Root element; `--dragging` while a drag is in progress      |
+| `badfennec-todo__list`, `--active`, `--completed`   | The two item containers                                     |
+| `badfennec-todo__item`, `--completed`, `--dragging` | One item row                                                |
+| `badfennec-todo__button`                            | Shared style of the icon `<button>`s                        |
+| `badfennec-todo__handle`, `__toggle`, `__delete`    | The item's drag handle, completion toggle and delete button |
+| `badfennec-todo__text`                              | The editable item text                                      |
+| `badfennec-todo__add`                               | The add-new-item row                                        |
+
+Default icons live in `view/icons.ts` (`DEFAULT_ICONS`), keyed like `TodoIcons`.
+
 ## Open points (to decide during the refactor)
 
 - Keyboard reordering keys (e.g. `Alt+↑/↓` on the handle).

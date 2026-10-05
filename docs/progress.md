@@ -48,7 +48,7 @@ When a step is done:
 
 | Done | Step | Content                                                                        | Resolves       | Suggested commit                      |
 | ---- | ---- | ------------------------------------------------------------------------------ | -------------- | ------------------------------------- |
-| [ ]  | 4.1  | `view/icons.ts` (consistent names) + `styles/todo.css` with `--bf-*` variables | C3, C4, D2     | `feat: add icons and themable styles` |
+| [x]  | 4.1  | `view/icons.ts` (consistent names) + `styles/todo.css` with `--bf-*` variables | C3, C4, D2     | `feat: add icons and themable styles` |
 | [ ]  | 4.2  | `TodoItemView`: real buttons, aria, text editing, debounce with `destroy()`    | A3, C1, C2, B8 | `feat: add todo item view`            |
 | [ ]  | 4.3  | `TodoListView`: containers + reconcile item views from store state             | B2, B7, A1     | `feat: add todo list view`            |
 | [ ]  | 4.4  | Add-item input (focus, emits `add`, empty items handled)                       | A7             | `feat: add new item input`            |

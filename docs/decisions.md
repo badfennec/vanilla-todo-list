@@ -112,3 +112,16 @@ Format: `## ADR-NNN — Title` · date · status (`accepted` / `superseded by AD
 - **Consequences:** It matches what drag & drop computes ("dropped at position N") and reads the same when moving up
   or down. A reference item would be more robust if the list changed between computing and applying the move, but moves
   are applied immediately, so that case doesn't arise.
+
+## ADR-012 — Flat BEM stylesheet themed with `--bf-*` custom properties
+
+- **Date:** 2026-10-05 · **Status:** accepted
+- **Context:** The legacy CSS uses nesting, hardcoded colors and a forced font (C4), and JS sets layout styles inline (C3).
+  Class names follow the legacy DOM (`__not-completed-container`, `__shape`, an `__item` / `__item-container` pair).
+- **Decision:** `styles/todo.css` uses flat BEM selectors and reads every visual value from a `--bf-*` custom property
+  declared on `.badfennec-todo`, with the legacy look as defaults. Classes are renamed for the new DOM:
+  `__list--active` / `__list--completed` for the containers, `__button` (real `<button>`s) instead of `__shape`, and one
+  `__item` element per row instead of `__item` + `__item-container`. The font is no longer forced (`--bf-font-family:
+inherit`); the demo imports Poppins. How the CSS is shipped to consumers is decided in step 6.2.
+- **Consequences:** Theming needs no JS option: `itemsGap` becomes `--bf-gap`. The renamed classes break custom CSS
+  written for the legacy markup, which is covered by the major version (ADR-003).

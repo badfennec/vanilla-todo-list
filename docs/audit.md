@@ -39,14 +39,14 @@ Status: `open` until the refactor step that resolves it is done, then `resolved 
 
 ## C. UI / accessibility / CSS
 
-| ID  | Problem                                                                                                                                   | Status |
-| --- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| C1  | Buttons are `<div>`s: no `role`, `tabindex`, `aria-label` or `aria-checked`, no keyboard support (including keyboard reordering).         | open   |
-| C2  | `contentEditable=true` with no Enter handling and no paste sanitization (use `plaintext-only` or an `<input>`).                           | open   |
-| C3  | Inline styles set from JS (`flexGrow`, `outline`, `cursor`, `marginBottom` for the gap). They belong in CSS (custom property `--bf-gap`). | open   |
-| C4  | Hardcoded colors, no CSS variables or theming. Dead CSS: `.badfennec-todo__item--intersected`.                                            | open   |
-| C5  | `innerHTML` with consumer-provided SVG strings is an XSS surface. Document it, or accept `SVGElement`.                                    | open   |
-| C6  | The library itself imports `@fontsource/poppins`, forcing a font on consumers (and contradicting the "zero dependencies" claim).          | open   |
+| ID  | Problem                                                                                                                                   | Status              |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| C1  | Buttons are `<div>`s: no `role`, `tabindex`, `aria-label` or `aria-checked`, no keyboard support (including keyboard reordering).         | open                |
+| C2  | `contentEditable=true` with no Enter handling and no paste sanitization (use `plaintext-only` or an `<input>`).                           | open                |
+| C3  | Inline styles set from JS (`flexGrow`, `outline`, `cursor`, `marginBottom` for the gap). They belong in CSS (custom property `--bf-gap`). | open                |
+| C4  | Hardcoded colors, no CSS variables or theming. Dead CSS: `.badfennec-todo__item--intersected`.                                            | resolved (step 4.1) |
+| C5  | `innerHTML` with consumer-provided SVG strings is an XSS surface. Document it, or accept `SVGElement`.                                    | open                |
+| C6  | The library itself imports `@fontsource/poppins`, forcing a font on consumers (and contradicting the "zero dependencies" claim).          | open                |
 
 ## D. Project / tooling
 
