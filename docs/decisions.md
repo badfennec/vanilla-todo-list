@@ -125,3 +125,16 @@ Format: `## ADR-NNN — Title` · date · status (`accepted` / `superseded by AD
 inherit`); the demo imports Poppins. How the CSS is shipped to consumers is decided in step 6.2.
 - **Consequences:** Theming needs no JS option: `itemsGap` becomes `--bf-gap`. The renamed classes break custom CSS
   written for the legacy markup, which is covered by the major version (ADR-003).
+
+## ADR-013 — Item text edited in a `plaintext-only` contenteditable
+
+- **Date:** 2026-10-05 · **Status:** accepted
+- **Context:** The legacy text is a `contentEditable=true` div with no Enter handling and no paste sanitization (C2),
+  and its debounce fires after the item is deleted (A3). An `<input>` can't wrap long texts; a `<textarea>` needs its
+  height computed in JS.
+- **Decision:** The text is a `<div contenteditable="plaintext-only" role="textbox">` with an accessible name from the
+  new `text` label. Enter confirms the text (blurs) instead of adding a line break, and pasted line breaks become spaces.
+  Changes are reported through `onEdit` after 300 ms without typing, or at once on blur; unchanged text is not reported.
+  `destroy()` drops a pending change instead of reporting it. `update()` doesn't rewrite the text while it has focus.
+- **Consequences:** Long texts wrap as before. `plaintext-only` needs a recent browser (Firefox 136+). Consumers get
+  one `edit` event per pause in typing, not one per keystroke.

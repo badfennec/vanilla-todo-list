@@ -20,6 +20,7 @@ src/
       TodoListView.ts         # renders the containers and keeps item views in sync with the store
       TodoItemView.ts         # DOM of a single item, reports user intents through callbacks
       icons.ts                # default SVG icons
+      labels.ts               # default texts and accessible names
     drag/
       DragController.ts       # pointer input on a handle: start / move / end / cancel
       resolveDropIndex.ts     # pure function: pointer Y + item rects → target index
@@ -133,7 +134,8 @@ The item gap moves from a JS option (`itemsGap`) to the CSS custom property `--b
 | `badfennec-todo__text`                              | The editable item text                                      |
 | `badfennec-todo__add`                               | The add-new-item row                                        |
 
-Default icons live in `view/icons.ts` (`DEFAULT_ICONS`), keyed like `TodoIcons`.
+Default icons live in `view/icons.ts` (`DEFAULT_ICONS`), keyed like `TodoIcons`. Default texts live in
+`view/labels.ts` (`DEFAULT_LABELS`), keyed like `TodoLabels`.
 
 ## Open points (to decide during the refactor)
 

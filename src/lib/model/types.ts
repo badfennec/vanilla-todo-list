@@ -30,6 +30,8 @@ export interface TodoLabels {
   readonly toggle: string;
   readonly delete: string;
   readonly drag: string;
+  /** Accessible name of the editable text of an item. */
+  readonly text: string;
 }
 
 /** Options after validation: items are complete, icons and labels contain only known keys. */
