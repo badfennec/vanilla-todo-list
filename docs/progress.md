@@ -88,3 +88,5 @@ When a step is done:
 | [x]  | 7.10 | Remove tests duplicated by the extracted units' own tests (wiring tests only) | —        | `test: remove duplicated view tests`             |
 | [x]  | 7.11 | `vercel.json`: deploy the demo (`build:demo` → `dist-demo`), not the library  | —        | `chore: deploy the demo on vercel`               |
 | [x]  | 7.12 | Animate the items making room during a drag (`transform` + CSS transition)    | —        | `feat: animate items shifting during drag`       |
+| [x]  | 7.13 | Animate the dropped item from where it was released to its slot (FLIP)        | —        | `feat: animate the drop`                         |
+| [x]  | 7.14 | Animate keyboard reordering: the items that change slot glide to it           | —        | `feat: animate keyboard reordering`              |

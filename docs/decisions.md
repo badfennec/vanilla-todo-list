@@ -335,3 +335,30 @@ inherit`); the demo imports Poppins. How the CSS is shipped to consumers is deci
 - **Consequences:** Removing the dragging class and the transforms in `finish()` happens in one frame, so the reorder
   after the drop is not animated. The drop itself (the item landing in its slot) and keyboard reordering are still
   instant.
+
+## ADR-029 — The dropped item lands with a FLIP animation
+
+- **Date:** 2026-10-05 · **Status:** accepted
+- **Context:** After ADR-028 the items make room smoothly, but on drop (or cancel) the dragged item still jumps from
+  the pointer to its slot.
+- **Decision:** `DragSession.top` keeps the top of the dragged item at the last move. After the drop, and after the
+  render of the move, `TodoListView` measures the item in its slot and calls `view/landing.ts`: `animateLanding()`
+  sets the start offset as a transform, forces a layout, adds `badfennec-todo__item--landing` (transform transition,
+  `--bf-shift-duration`) and clears the transform; the class goes away at the end of the transform transition. Here
+  FLIP is fine (unlike ADR-028): one element, one measure per drop. A cancel (Escape, pointer lost) lands the item
+  back in its slot; a cancel caused by `render()` does not, because the DOM is being rebuilt. A new drag or
+  `destroy()` stops the landing first, so the items are measured in their slots.
+- **Consequences:** With `prefers-reduced-motion` the duration is 0s and no `transitionend` fires: the class stays
+  until the next drag or `destroy()`, with no visible effect. Keyboard reordering is still instant.
+
+## ADR-030 — Keyboard reordering uses the landing animation
+
+- **Date:** 2026-10-05 · **Status:** accepted (updates ADR-029)
+- **Context:** After ADR-028 and ADR-029 the pointer drag is animated, but a move with the arrows (or Home / End)
+  still jumps.
+- **Decision:** Before reporting a keyboard move, `TodoListView` measures the active items where they are on screen;
+  after the render of the move it animates every item whose slot changed with `animateLanding()`, the same FLIP as the
+  drop. The measures before the move include the transforms of landings still running, so pressing a key again
+  mid-animation continues from where the items are, without jumps. All the measures come before all the animations.
+- **Consequences:** Several items can be landing at once (all the ones between the old and the new slot with Home /
+  End): the view keeps a list of stop functions instead of one. Focus and announcements are unchanged.
