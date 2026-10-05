@@ -66,7 +66,8 @@ user action ──▶ TodoItemView / DragController ──(callback)──▶ To
 - The view never mutates data. It reports an intent (`onToggle(id)`, `onEdit(id, text)`, `onDelete(id)`…).
 - The store applies the change and emits an event.
 - `TodoListView` reconciles the DOM with the new items. It keeps a `Map<id, TodoItemView>`, creates and destroys views
-  as needed, and re-appends nodes in store order. It does no diffing beyond that (KISS).
+  as needed, and puts nodes in store order, moving only the ones that are out of place (moving a node makes it lose
+  focus, so the item being edited must stay put). It does no diffing beyond that (KISS).
 - Order is **never** read from the DOM.
 
 ## Data model
