@@ -33,7 +33,7 @@ Status: `open` until the refactor step that resolves it is done, then `resolved 
 | B7  | `DOMHandler`: a class with no state. It should be a view, or plain functions.                                                                                                                                 | resolved (step 4.3) |
 | B8  | Constructors with 15+ loose arguments (`TodoItem`). Defaults (icons) are scattered across 3 files.                                                                                                            | resolved (step 4.2) |
 | B9  | Everything is public and mutable. Dead code: `rect`, `draggingItemOriginY`, `index`/`setIndex`, `middleHeight`, `marginBottom`, `spaceAvailableHeight`, the unused `deltaY` in `#move`, commented-out blocks. | open                |
-| B10 | Misleading names: the "deltaY" passed around is actually the absolute `clientY`. `onUpdate` means toggle.                                                                                                     | open                |
+| B10 | Misleading names: the "deltaY" passed around is actually the absolute `clientY`. `onUpdate` means toggle.                                                                                                     | resolved (step 5.1) |
 | B11 | The public API is only `on()`. Missing: `add`, `remove`, `getItems`, `setItems`, `destroy`, `off`.                                                                                                            | open                |
 | B12 | No input validation: a selector that matches nothing crashes later with an unclear error.                                                                                                                     | open                |
 

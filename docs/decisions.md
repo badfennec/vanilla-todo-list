@@ -152,3 +152,15 @@ inherit`); the demo imports Poppins. How the CSS is shipped to consumers is deci
   focus.
 - **Consequences:** Consumers see `add` followed by `remove` for an item created and abandoned. The wiring
   (`onAdd` → `store.add()` → `editAsNew`) lives in the `TodoList` facade (step 6.1).
+
+## ADR-015 — Drop index from fixed midpoint thresholds
+
+- **Date:** 2026-10-05 · **Status:** accepted
+- **Context:** The legacy drop logic recomputes item rects on every move, adding the placeholder height by hand, and
+  keeps state between drags (A2). The names it passes around are misleading (`deltaY` is an absolute `clientY`, B10).
+- **Decision:** `resolveDropIndex(y, spans, fromIndex)` is a pure function. `spans` are the active items, measured once
+  at drag start relative to the list container. The target index is the number of other items whose middle is above
+  `y`. Which `y` is passed (the pointer or the dragged item's middle) is decided when wiring the drag in step 5.3.
+- **Consequences:** The index is a monotonic function of `y`, so it can't flicker while the placeholder shifts items on
+  screen, and the function has no state to reset. It assumes the layout doesn't change during a drag (no reflow
+  from other sources); scroll is handled by measuring relative to the container.

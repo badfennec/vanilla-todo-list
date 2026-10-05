@@ -23,7 +23,7 @@ src/
       labels.ts               # default texts and accessible names
     drag/
       DragController.ts       # pointer input on a handle: start / move / end / cancel
-      resolveDropIndex.ts     # pure function: pointer Y + item rects → target index
+      resolveDropIndex.ts     # pure function: y + item spans + dragged index → target index
     styles/
       todo.css                # BEM classes + --bf-* custom properties
   demo/
@@ -89,7 +89,7 @@ type TodoItem = { id: string; text: string; completed: boolean };
 1. `pointerdown` on an item handle (primary button only, active items only) makes `DragController` capture the pointer.
 2. At drag start `TodoListView` measures the active items' rects **once**, relative to the list container, so that
    page scroll doesn't break them. It also inserts a placeholder.
-3. On `pointermove`, `DragController` translates the element, and `resolveDropIndex(pointerY, rects)` gives the
+3. On `pointermove`, `DragController` translates the element, and `resolveDropIndex(y, spans, fromIndex)` gives the
    target index. The view moves the placeholder there.
 4. On `pointerup`, `TodoList` calls `store.move(id, index)` and the view re-renders. On `pointercancel` or `Escape`,
    nothing changes and the item returns to its place.
