@@ -235,12 +235,12 @@ describe('TodoListView', () => {
     });
 
     it('keeps the drop position in sync when the page scrolls during a drag (A9)', () => {
-      const { pointer, item, placeholder, activeChildren, scrollPage, onMove } = setupDrag();
-      const [a, b, d] = [item(0), item(1), item(2)];
+      const { pointer, item, placeholder, scrollPage, onMove } = setupDrag();
+      const a = item(0);
 
       pointer(0, 'pointerdown', 500);
       scrollPage(60); // the pointer stays still, the list moves up: middle at 80, after B
-      expect(activeChildren()).toEqual([a, b, placeholder(), d]);
+      expect((placeholder() as HTMLElement).style.transform).toBe('translateY(50px)');
       expect(a.style.transform).toBe('translate3d(0, 60px, 0)');
 
       pointer(0, 'pointerup', 500);
