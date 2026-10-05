@@ -19,6 +19,7 @@
   --bf-shadow-dragging: 0 10px 20px rgb(0 0 0 / 20%);
   --bf-icon-size: 18px;
   --bf-focus-color: #2563eb;
+  --bf-shift-duration: 0.2s;
 
   display: grid;
   gap: var(--bf-section-gap);
@@ -92,6 +93,27 @@
   box-sizing: border-box;
   border: 2px dashed var(--bf-border-color);
   border-radius: var(--bf-radius);
+}
+
+/*
+ * During a drag JS shifts the other items and the placeholder with `transform` (the DOM order doesn't change):
+ * animate it. Only while dragging, so the reorder after the drop is instant.
+ */
+.badfennec-todo--dragging .badfennec-todo__item:not(.badfennec-todo__item--dragging) {
+  transition:
+    box-shadow 0.3s ease,
+    opacity 0.3s ease,
+    transform var(--bf-shift-duration) ease;
+}
+
+.badfennec-todo--dragging .badfennec-todo__placeholder {
+  transition: transform var(--bf-shift-duration) ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badfennec-todo {
+    --bf-shift-duration: 0s;
+  }
 }
 
 /* Icon buttons (real <button> elements) */

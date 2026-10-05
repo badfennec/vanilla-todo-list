@@ -21,10 +21,8 @@ function setup(fromIndex = 0) {
 
   const session = new DragSession({ root, list, elements, fromIndex });
   const placeholder = (): Element | null => list.querySelector('.badfennec-todo__placeholder');
-  // The dragged element is out of the flow: only the order of the others and of the placeholder is visible.
-  const flow = (): Element[] => [...list.children].filter((child) => child !== elements[fromIndex]);
 
-  return { root, list, elements, session, placeholder, flow };
+  return { root, list, elements, session, placeholder };
 }
 
 describe('DragSession', () => {
@@ -51,25 +49,29 @@ describe('DragSession', () => {
     expect(session.index).toBe(2);
   });
 
-  it('moves the placeholder once the dragged middle passes another middle', () => {
-    const { elements, session, placeholder, flow } = setup(0);
-    const [, b, c] = elements;
+  it('shifts the other items and the placeholder once the dragged middle passes another middle', () => {
+    const { list, elements, session, placeholder } = setup(0);
+    const [a, b, c] = elements;
+    const shifts = (): string[] => [placeholder(), b, c].map((element) => (element as HTMLElement).style.transform);
 
     session.move(49); // middle at 69: still before B
     expect(session.index).toBe(0);
-    expect(flow()).toEqual([placeholder(), b, c]);
+    expect(shifts()).toEqual(['', '', '']);
 
     session.move(51); // middle at 71: after B
     expect(session.index).toBe(1);
-    expect(flow()).toEqual([b, placeholder(), c]);
+    expect(shifts()).toEqual(['translateY(50px)', 'translateY(-50px)', '']);
 
     session.move(500); // past C: last
     expect(session.index).toBe(2);
-    expect(flow()).toEqual([b, c, placeholder()]);
+    expect(shifts()).toEqual(['translateY(100px)', 'translateY(-50px)', 'translateY(-50px)']);
 
     session.move(-500); // back to the top
     expect(session.index).toBe(0);
-    expect(flow()).toEqual([placeholder(), b, c]);
+    expect(shifts()).toEqual(['', '', '']);
+
+    // The DOM order never changes during a drag: only transforms do.
+    expect([...list.children]).toEqual([placeholder(), a, b, c]);
   });
 
   it('restores the DOM on finish, and can be finished twice', () => {
@@ -81,6 +83,7 @@ describe('DragSession', () => {
 
     expect(placeholder()).toBeNull();
     expect([...list.children]).toEqual(elements);
+    expect(elements.map((element) => element.style.transform)).toEqual(['', '', '']);
     expect(elements[0]?.style.top).toBe('');
     expect(elements[0]?.classList.contains('badfennec-todo__item--dragging')).toBe(false);
     expect(root.classList.contains('badfennec-todo--dragging')).toBe(false);

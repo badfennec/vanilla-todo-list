@@ -87,3 +87,4 @@ When a step is done:
 | [x]  | 7.9  | Extract `EditableText` from `TodoItemView` (text editing, no todo knowledge)  | —        | `refactor: extract editable text from item view` |
 | [x]  | 7.10 | Remove tests duplicated by the extracted units' own tests (wiring tests only) | —        | `test: remove duplicated view tests`             |
 | [x]  | 7.11 | `vercel.json`: deploy the demo (`build:demo` → `dist-demo`), not the library  | —        | `chore: deploy the demo on vercel`               |
+| [x]  | 7.12 | Animate the items making room during a drag (`transform` + CSS transition)    | —        | `feat: animate items shifting during drag`       |

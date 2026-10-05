@@ -171,6 +171,7 @@ container:
 | `--bf-shadow-dragging` | `0 10px 20px rgb(0 0 0 / 20%)` |
 | `--bf-icon-size`       | `18px`                         |
 | `--bf-focus-color`     | `#2563eb`                      |
+| `--bf-shift-duration`  | `0.2s` (items making room)     |
 
 To write a theme from scratch, skip `style.css` and style the BEM classes: `badfennec-todo`, `__list--active`,
 `__list--completed`, `__item`, `__item--completed`, `__item--dragging`, `__placeholder`, `__button`, `__handle`,

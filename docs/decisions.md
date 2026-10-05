@@ -320,3 +320,18 @@ inherit`); the demo imports Poppins. How the CSS is shipped to consumers is deci
   `dist-demo`. The scripts stay as they are (`build` = library, `build:demo` = site).
 - **Consequences:** The deploy configuration is versioned with the code and overrides the dashboard settings. Any
   change to the demo build (command or folder) must update `vercel.json` too.
+
+## ADR-028 — Drag shifts items with transforms
+
+- **Date:** 2026-10-05 · **Status:** accepted (updates ADR-017)
+- **Context:** The placeholder was moved in the DOM on every drop index change, so the items around it jumped to their
+  new place. The legacy version animated them.
+- **Decision:** The DOM order no longer changes during a drag. The placeholder stays in the slot of the dragged item;
+  the pure function `drag/dragOffsets.ts` computes, from the spans measured at start, the offset of every item (the
+  slot of the dragged item, up or down) and of the placeholder (to the slot of the drop index). `DragSession` sets
+  them as `transform: translateY()` and CSS animates the transform only under `.badfennec-todo--dragging`, for
+  `--bf-shift-duration` (0.2s, 0s with `prefers-reduced-motion`). FLIP was rejected: it needs a measure on every
+  index change and a double animation frame.
+- **Consequences:** Removing the dragging class and the transforms in `finish()` happens in one frame, so the reorder
+  after the drop is not animated. The drop itself (the item landing in its slot) and keyboard reordering are still
+  instant.
