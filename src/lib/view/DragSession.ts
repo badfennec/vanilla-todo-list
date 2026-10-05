@@ -30,6 +30,7 @@ export class DragSession {
   readonly #startTop: number;
   readonly #height: number;
   #index: number;
+  #offsetY = 0;
 
   /** @throws {RangeError} if `fromIndex` is not an index of `elements`. */
   constructor({ root, list, elements, fromIndex }: DragSessionOptions) {
@@ -72,8 +73,14 @@ export class DragSession {
     return this.#index;
   }
 
+  /** Top of the dragged item at the last move, relative to the list. */
+  get top(): number {
+    return this.#startTop + this.#offsetY;
+  }
+
   /** Updates the drop index for the dragged item moved by `offsetY` and shifts the items and the placeholder. */
   move(offsetY: number): void {
+    this.#offsetY = offsetY;
     // The middle of the dragged item, not the pointer: the handle is near the top of the item.
     const y = this.#startTop + offsetY + this.#height / 2;
     const index = resolveDropIndex(y, this.#spans, this.fromIndex);

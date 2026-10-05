@@ -4,6 +4,7 @@ import type { TodoIcons, TodoItem, TodoLabels } from '../model/types';
 import { Announcer } from './Announcer';
 import { DragSession } from './DragSession';
 import { fillLabel } from './labels';
+import { animateLanding } from './landing';
 import { TodoItemView } from './TodoItemView';
 
 export interface TodoListViewOptions {
@@ -56,6 +57,8 @@ export class TodoListView {
   /** Active items of the last render, in display order. */
   #active: readonly ActiveItem[] = [];
   #drag: ActiveDrag | undefined;
+  /** Stops the landing animation of the last dropped item, if it is still running. */
+  #stopLanding: (() => void) | undefined;
 
   constructor({ root, onAdd, onMove, ...itemOptions }: TodoListViewOptions) {
     this.#root = root;
@@ -78,9 +81,10 @@ export class TodoListView {
   /** Creates, updates and removes item views so that the lists show exactly these items, in this order. */
   render(items: readonly TodoItem[]): void {
     // The items may have changed under the drag (e.g. a pending edit was applied): stop it, nothing is moved.
-    if (this.#drag) {
-      this.#entries.get(this.#drag.id)?.drag.cancel();
-      this.#finishDrag();
+    // The session ends first, so the controller's cancel finds no drag and nothing lands mid-render.
+    const drag = this.#finishDrag();
+    if (drag) {
+      this.#entries.get(drag.id)?.drag.cancel();
     }
 
     const ids = new Set(items.map((item) => item.id));
@@ -139,6 +143,7 @@ export class TodoListView {
   /** Destroys every item view, stops a drag in progress and removes the lists and the root class. */
   destroy(): void {
     this.#finishDrag();
+    this.#endLanding();
     for (const entry of this.#entries.values()) {
       destroyEntry(entry);
     }
@@ -204,7 +209,10 @@ export class TodoListView {
         this.#endDrag();
       },
       onCancel: () => {
-        this.#finishDrag();
+        const drag = this.#finishDrag();
+        if (drag) {
+          this.#land(drag);
+        }
       },
     });
 
@@ -217,6 +225,8 @@ export class TodoListView {
       return;
     }
 
+    // A landing item must be measured in its slot, not mid-animation.
+    this.#endLanding();
     const session = new DragSession({
       root: this.#root,
       list: this.#activeList,
@@ -228,11 +238,32 @@ export class TodoListView {
 
   #endDrag(): void {
     const drag = this.#finishDrag();
+    if (!drag) {
+      return;
+    }
 
     // The DOM is back as it was; the store applies the move and the next render reorders the items.
-    if (drag && drag.session.index !== drag.session.fromIndex) {
+    if (drag.session.index !== drag.session.fromIndex) {
       this.#onMove(drag.id, drag.session.index);
     }
+    this.#land(drag);
+  }
+
+  /** Animates the dragged item from where it was released to its slot (after the render of the move, if any). */
+  #land({ id, session }: ActiveDrag): void {
+    const element = this.#entries.get(id)?.view.element;
+    if (!element?.isConnected) {
+      return;
+    }
+
+    const top = element.getBoundingClientRect().top - this.#activeList.getBoundingClientRect().top;
+    this.#endLanding();
+    this.#stopLanding = animateLanding(element, session.top - top);
+  }
+
+  #endLanding(): void {
+    this.#stopLanding?.();
+    this.#stopLanding = undefined;
   }
 
   /** Ends the visual session of the drag in progress, if any, and returns it. */

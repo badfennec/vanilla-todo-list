@@ -110,6 +110,16 @@
   transition: transform var(--bf-shift-duration) ease;
 }
 
+/* The dropped item glides from where it was released to its slot: JS sets the start offset (see `landing.ts`). */
+.badfennec-todo__item--landing {
+  position: relative;
+  z-index: 1;
+  transition:
+    box-shadow 0.3s ease,
+    opacity 0.3s ease,
+    transform var(--bf-shift-duration) ease;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .badfennec-todo {
     --bf-shift-duration: 0s;

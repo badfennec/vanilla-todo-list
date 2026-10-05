@@ -42,11 +42,20 @@ describe('DragSession', () => {
     expect(root.classList.contains('badfennec-todo--dragging')).toBe(true);
   });
 
-  it('starts at the index of the dragged item', () => {
+  it('starts at the index and the top of the dragged item', () => {
     const { session } = setup(2);
 
     expect(session.fromIndex).toBe(2);
     expect(session.index).toBe(2);
+    expect(session.top).toBe(100);
+  });
+
+  it('tracks the top of the dragged item', () => {
+    const { session } = setup(2);
+
+    session.move(-30);
+
+    expect(session.top).toBe(70);
   });
 
   it('shifts the other items and the placeholder once the dragged middle passes another middle', () => {

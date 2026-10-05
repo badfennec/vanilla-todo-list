@@ -304,6 +304,34 @@ describe('TodoListView', () => {
       expect(item(0).classList.contains('badfennec-todo__item--dragging')).toBe(false);
     });
 
+    it('animates the dropped item from where it was released to its slot', () => {
+      const { pointer, item } = setupDrag();
+      const d = item(2);
+
+      pointer(2, 'pointerdown', 500);
+      pointer(2, 'pointermove', 400);
+      pointer(2, 'pointerup', 400);
+      expect(d.classList.contains('badfennec-todo__item--landing')).toBe(true);
+
+      // A new drag measures the items in their slots: the landing stops first.
+      pointer(0, 'pointerdown', 500);
+      expect(d.classList.contains('badfennec-todo__item--landing')).toBe(false);
+    });
+
+    it('animates the item back to its slot when the drag is cancelled, not when the items are rendered again', () => {
+      const { view, pointer, item } = setupDrag();
+
+      pointer(0, 'pointerdown', 500);
+      pointer(0, 'pointermove', 600);
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      expect(item(0).classList.contains('badfennec-todo__item--landing')).toBe(true);
+
+      pointer(1, 'pointerdown', 500);
+      pointer(1, 'pointermove', 600);
+      view.render([A, B, D, C]);
+      expect(item(1).classList.contains('badfennec-todo__item--landing')).toBe(false);
+    });
+
     it('stops the drag on destroy', () => {
       const { view, root, pointer, onMove } = setupDrag();
       const handle = root.querySelector('.badfennec-todo__handle');
