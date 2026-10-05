@@ -3,6 +3,12 @@
   "private": true,
   "version": "0.0.0",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/badfennec/vanilla-todo-list.git"
+  },
+  "homepage": "https://github.com/badfennec/vanilla-todo-list#readme",
+  "bugs": "https://github.com/badfennec/vanilla-todo-list/issues",
   "type": "module",
   "files": [
     "dist"

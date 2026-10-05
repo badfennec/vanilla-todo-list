@@ -18,6 +18,8 @@ pen.
 The package is not published on npm yet. Build it from this repository:
 
 ```bash
+git clone https://github.com/badfennec/vanilla-todo-list.git
+cd vanilla-todo-list
 npm install
 npm run build   # dist/badfennec-todo.js, dist/badfennec-todo.css and the .d.ts files
 ```
