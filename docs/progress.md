@@ -79,3 +79,4 @@ When a step is done:
 | [x]  | 7.1  | Keep the drag in sync when the page scrolls during a drag                    | A9 (1/2) | `fix: keep drag in sync with scrolling` |
 | [x]  | 7.2  | Autoscroll when dragging near the top or bottom edge of the scroll container | A9       | `feat: add autoscroll while dragging`   |
 | [x]  | 7.3  | Remove the `refactor-module` skill (the legacy code it ported is gone)       | —        | `chore: remove refactor-module skill`   |
+| [x]  | 7.4  | MIT license: `LICENSE`, `license` in `package.json`, README section          | —        | `docs: add mit license`                 |

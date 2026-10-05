@@ -222,3 +222,7 @@ Renamed CSS classes, if you styled the old markup:
 | `badfennec-todo__add-new-item-box`          | `badfennec-todo__add`                |
 | `badfennec-todo__grabber`                   | `badfennec-todo__handle`             |
 | `badfennec-todo__checkbox`                  | `badfennec-todo__toggle`             |
+
+## License
+
+[MIT](LICENSE)
