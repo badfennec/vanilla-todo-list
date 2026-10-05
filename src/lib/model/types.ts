@@ -32,6 +32,8 @@ export interface TodoLabels {
   readonly drag: string;
   /** Accessible name of the editable text of an item. */
   readonly text: string;
+  /** Announced after a keyboard move. `{position}` and `{total}` are replaced with numbers. */
+  readonly moved: string;
 }
 
 /** Options after validation: items are complete, icons and labels contain only known keys. */

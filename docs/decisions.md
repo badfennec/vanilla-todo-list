@@ -192,3 +192,16 @@ inherit`); the demo imports Poppins. How the CSS is shipped to consumers is deci
   a drag (e.g. a pending text edit applied) cancels the drag, so the DOM never drifts from the store.
 - **Consequences:** Scrolling the page before a drag doesn't matter. Scrolling during a drag and autoscroll near the
   edges are not handled yet.
+
+## ADR-018 — Keyboard reordering with arrows on the handle
+
+- **Date:** 2026-10-05 · **Status:** accepted
+- **Context:** Reordering was mouse/touch only (C1). Options considered: arrows on the focused handle, a
+  "grab with Space, move, drop with Space" mode (dnd-kit / WAI-ARIA pattern), and `Alt+↑/↓`.
+- **Decision:** With the focus on an active item's handle, `↑` / `↓` move it by one position and `Home` / `End` to the
+  first / last one; keys with modifiers are ignored. The move is applied at once through `onMove`, like a drop. After
+  any re-render `TodoListView` gives the focus back to the element that had it if moving its node dropped it (this
+  also keeps the focus on the toggle of an item that changes list). The new position is announced in a
+  `role="status"` live region, with the new `moved` label (`{position}` / `{total}` placeholders).
+- **Consequences:** No intermediate state to manage or cancel. Arrow keys are consumed on the handle even at the
+  edges, so they never scroll the page from there.

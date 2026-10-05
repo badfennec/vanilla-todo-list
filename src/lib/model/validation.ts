@@ -4,7 +4,14 @@ import type { ParsedTodoOptions, TodoIcons, TodoItem, TodoLabels, TodoOptions } 
 // Typed as Record<keyof T, true> so the compiler fails if a key is added to the interface but not here.
 const OPTION_KEYS = keysOf<TodoOptions>({ items: true, icons: true, labels: true });
 const ICON_KEYS = keysOf<TodoIcons>({ checked: true, unchecked: true, grab: true, delete: true, add: true });
-const LABEL_KEYS = keysOf<TodoLabels>({ addItem: true, toggle: true, delete: true, drag: true, text: true });
+const LABEL_KEYS = keysOf<TodoLabels>({
+  addItem: true,
+  toggle: true,
+  delete: true,
+  drag: true,
+  text: true,
+  moved: true,
+});
 
 /**
  * Validates one consumer-provided item and fills in the defaults.

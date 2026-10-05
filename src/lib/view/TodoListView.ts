@@ -51,6 +51,9 @@ export class TodoListView {
   readonly #activeList: HTMLUListElement;
   readonly #completedList: HTMLUListElement;
   readonly #addButton: HTMLButtonElement;
+  /** Live region announcing keyboard moves to screen readers. */
+  readonly #status: HTMLDivElement;
+  readonly #movedLabel: string;
   readonly #entries = new Map<string, Entry>();
   readonly #itemOptions: Omit<TodoListViewOptions, 'root' | 'onAdd' | 'onMove'>;
   readonly #onAdd: () => void;
@@ -69,9 +72,15 @@ export class TodoListView {
     this.#completedList = createList('badfennec-todo__list--completed');
     this.#addButton = createAddButton(itemOptions.labels.addItem, itemOptions.icons.add);
     this.#addButton.addEventListener('click', this.#handleAdd);
+    this.#activeList.addEventListener('keydown', this.#handleKeyDown);
+
+    this.#movedLabel = itemOptions.labels.moved;
+    this.#status = document.createElement('div');
+    this.#status.className = 'badfennec-todo__status';
+    this.#status.setAttribute('role', 'status');
 
     this.#root.classList.add('badfennec-todo');
-    this.#root.append(this.#activeList, this.#addButton, this.#completedList);
+    this.#root.append(this.#activeList, this.#addButton, this.#completedList, this.#status);
   }
 
   /** Creates, updates and removes item views so that the lists show exactly these items, in this order. */
@@ -110,11 +119,16 @@ export class TodoListView {
     }
     this.#active = active;
 
+    // Moving a node makes it lose focus: give it back, so keyboard users stay on the item they moved or toggled.
+    const focused = document.activeElement;
     placeChildren(
       this.#activeList,
       active.map(({ element }) => element),
     );
     placeChildren(this.#completedList, completed);
+    if (focused instanceof HTMLElement && focused !== document.activeElement && this.#root.contains(focused)) {
+      focused.focus();
+    }
   }
 
   /**
@@ -138,14 +152,46 @@ export class TodoListView {
     }
     this.#entries.clear();
     this.#addButton.removeEventListener('click', this.#handleAdd);
+    this.#activeList.removeEventListener('keydown', this.#handleKeyDown);
     this.#activeList.remove();
     this.#addButton.remove();
     this.#completedList.remove();
+    this.#status.remove();
     this.#root.classList.remove('badfennec-todo');
   }
 
   readonly #handleAdd = (): void => {
     this.#onAdd();
+  };
+
+  /** Keyboard reordering on a focused handle: ↑/↓ move by one, Home/End to the first/last position. */
+  readonly #handleKeyDown = (event: KeyboardEvent): void => {
+    if (this.#drag || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
+      return;
+    }
+
+    const fromIndex = this.#active.findIndex(({ id }) => this.#entries.get(id)?.view.handle === event.target);
+    const item = this.#active[fromIndex];
+    if (!item) {
+      return;
+    }
+
+    const lastIndex = this.#active.length - 1;
+    const toIndex = keyTargets(fromIndex, lastIndex)[event.key];
+    if (toIndex === undefined) {
+      return;
+    }
+
+    // Also keeps the arrows from scrolling the page at the first or last position.
+    event.preventDefault();
+    if (toIndex < 0 || toIndex > lastIndex || toIndex === fromIndex) {
+      return;
+    }
+
+    this.#onMove(item.id, toIndex);
+    this.#status.textContent = this.#movedLabel
+      .replace('{position}', String(toIndex + 1))
+      .replace('{total}', String(lastIndex + 1));
   };
 
   #createEntry(item: TodoItem): Entry {
@@ -241,6 +287,10 @@ export class TodoListView {
     drag.element.classList.remove('badfennec-todo__item--dragging');
     this.#root.classList.remove('badfennec-todo--dragging');
   }
+}
+
+function keyTargets(index: number, lastIndex: number): Partial<Record<string, number>> {
+  return { ArrowUp: index - 1, ArrowDown: index + 1, Home: 0, End: lastIndex };
 }
 
 function destroyEntry({ view, drag }: Entry): void {

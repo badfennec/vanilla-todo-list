@@ -144,6 +144,19 @@
   cursor: grabbing;
 }
 
+/* Live region for screen readers: present in the accessibility tree, invisible on screen. */
+.badfennec-todo__status {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  white-space: nowrap;
+  clip-path: inset(50%);
+  border: 0;
+}
+
 /* Only active items can be moved: keep the slot so the layout doesn't shift. */
 .badfennec-todo__item--completed .badfennec-todo__handle {
   visibility: hidden;

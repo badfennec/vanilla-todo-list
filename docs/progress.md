@@ -60,7 +60,7 @@ When a step is done:
 | [x]  | 5.1  | `drag/resolveDropIndex.ts` (pure) + tests                                                | B10        | `feat: add drop index resolver`     |
 | [x]  | 5.2  | `drag/DragController.ts` (Pointer Events, capture, cancel, primary button only)          | A4, A5, B3 | `feat: add pointer drag controller` |
 | [x]  | 5.3  | Placeholder in `TodoListView` + wire drag to `store.move()`, rects relative to container | A2, A9     | `feat: wire drag and drop to store` |
-| [ ]  | 5.4  | Keyboard reordering (decide the keys first)                                              | C1         | `feat: add keyboard reordering`     |
+| [x]  | 5.4  | Keyboard reordering (decide the keys first)                                              | C1         | `feat: add keyboard reordering`     |
 
 ## Phase 6 — Public API, demo, cleanup
 

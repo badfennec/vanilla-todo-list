@@ -145,6 +145,7 @@ The item gap moves from a JS option (`itemsGap`) to the CSS custom property `--b
 | `badfennec-todo__button`                            | Shared style of the icon `<button>`s                        |
 | `badfennec-todo__handle`, `__toggle`, `__delete`    | The item's drag handle, completion toggle and delete button |
 | `badfennec-todo__placeholder`                       | Keeps the slot of the dragged item                          |
+| `badfennec-todo__status`                            | Visually hidden live region for announcements               |
 | `badfennec-todo__text`                              | The editable item text                                      |
 | `badfennec-todo__add`                               | The add-new-item row (one `<button>` with a visible label)  |
 | `badfennec-todo__icon`                              | Icon wrapper inside the add row                             |
@@ -152,6 +153,13 @@ The item gap moves from a JS option (`itemsGap`) to the CSS custom property `--b
 Default icons live in `view/icons.ts` (`DEFAULT_ICONS`), keyed like `TodoIcons`. Default texts live in
 `view/labels.ts` (`DEFAULT_LABELS`), keyed like `TodoLabels`.
 
+## Keyboard reordering
+
+With the focus on an active item's handle, `↑` / `↓` move the item by one position and `Home` / `End` move it to the
+first / last position (no modifiers). `TodoListView` reports `onMove(id, toIndex)` like a drop, keeps the focus on the
+moved handle after the re-render, and announces the new position in a `role="status"` live region (`moved` label).
+See ADR-018.
+
 ## Open points (to decide during the refactor)
 
-- Keyboard reordering keys (e.g. `Alt+↑/↓` on the handle).
+- None at the moment.

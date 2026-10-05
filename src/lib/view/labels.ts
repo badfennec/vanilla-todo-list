@@ -7,4 +7,5 @@ export const DEFAULT_LABELS: Readonly<TodoLabels> = Object.freeze({
   delete: 'Delete item',
   drag: 'Move item',
   text: 'Item text',
+  moved: 'Moved to position {position} of {total}',
 });

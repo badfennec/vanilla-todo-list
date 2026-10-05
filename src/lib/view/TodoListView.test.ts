@@ -42,11 +42,13 @@ describe('TodoListView', () => {
     document.body.replaceChildren();
   });
 
-  it('renders the active list, the add row and the completed list into the root', () => {
+  it('renders the active list, the add row, the completed list and a status region into the root', () => {
     const { root, list, addButton } = setup();
+    const status = root.querySelector('.badfennec-todo__status');
 
     expect(root.classList.contains('badfennec-todo')).toBe(true);
-    expect([...root.children]).toEqual([list('active'), addButton(), list('completed')]);
+    expect([...root.children]).toEqual([list('active'), addButton(), list('completed'), status]);
+    expect(status?.getAttribute('role')).toBe('status');
   });
 
   it('renders the add row as a button with a visible label', () => {
@@ -322,6 +324,102 @@ describe('TodoListView', () => {
       expect(onMove).not.toHaveBeenCalled();
       expect(root.querySelector('.badfennec-todo__placeholder')).toBeNull();
       expect(root.classList.contains('badfennec-todo--dragging')).toBe(false);
+    });
+  });
+
+  describe('keyboard reordering', () => {
+    const D: TodoItem = { id: 'd', text: 'D', completed: false };
+
+    /** Renders the items and re-renders them like the store would when a move is reported. */
+    function setupKeyboard() {
+      const context = setup();
+      let items: TodoItem[] = [A, B, D, C];
+      context.view.render(items);
+      context.onMove.mockImplementation((id: string, toIndex: number) => {
+        const moved = items.find((item) => item.id === id);
+        if (!moved) return;
+        items = items.filter((item) => item !== moved);
+        items.splice(toIndex, 0, moved);
+        context.view.render(items);
+      });
+
+      const press = (index: number, key: string, init: KeyboardEventInit = {}): KeyboardEvent => {
+        const handle = context.button(index, 'handle');
+        handle.focus();
+        const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...init });
+        handle.dispatchEvent(event);
+        return event;
+      };
+      const status = (): string | null | undefined =>
+        context.root.querySelector('.badfennec-todo__status')?.textContent;
+
+      return { ...context, press, status };
+    }
+
+    it('moves the item up and down by one with the arrows', () => {
+      const { press, texts, onMove } = setupKeyboard();
+
+      press(0, 'ArrowDown');
+      expect(onMove).toHaveBeenLastCalledWith('a', 1);
+      expect(texts('active')).toEqual(['B', 'A', 'D']);
+
+      press(2, 'ArrowUp');
+      expect(onMove).toHaveBeenLastCalledWith('d', 1);
+      expect(texts('active')).toEqual(['B', 'D', 'A']);
+    });
+
+    it('moves the item to the first or last position with Home and End', () => {
+      const { press, onMove } = setupKeyboard();
+
+      press(2, 'Home');
+      expect(onMove).toHaveBeenLastCalledWith('d', 0);
+
+      press(0, 'End');
+      expect(onMove).toHaveBeenLastCalledWith('d', 2);
+    });
+
+    it('keeps focus on the handle of the moved item', () => {
+      const { root, press } = setupKeyboard();
+      // Moving D up re-inserts D's own node, which drops its focus.
+      const handle = root.querySelectorAll('.badfennec-todo__handle').item(2);
+
+      press(2, 'ArrowUp');
+
+      expect(document.activeElement).toBe(handle);
+    });
+
+    it('announces the new position', () => {
+      const { press, status } = setupKeyboard();
+
+      press(0, 'End');
+
+      expect(status()).toBe('Moved to position 3 of 3');
+    });
+
+    it('does nothing at the edges, but keeps the arrows from scrolling the page', () => {
+      const { press, onMove, status } = setupKeyboard();
+
+      const up = press(0, 'ArrowUp');
+      const down = press(2, 'ArrowDown');
+      press(0, 'Home');
+
+      expect(onMove).not.toHaveBeenCalled();
+      expect(up.defaultPrevented).toBe(true);
+      expect(down.defaultPrevented).toBe(true);
+      expect(status()).toBe('');
+    });
+
+    it('ignores other keys, modifiers and keys outside the handle', () => {
+      const { root, press, onMove } = setupKeyboard();
+
+      press(0, 'Enter');
+      press(0, 'ArrowDown', { altKey: true });
+      press(0, 'ArrowDown', { shiftKey: true });
+      root
+        .querySelector('.badfennec-todo__toggle')
+        ?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+
+      expect(onMove).not.toHaveBeenCalled();
     });
   });
 });
