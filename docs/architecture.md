@@ -139,6 +139,18 @@ return the resulting item. The view re-renders before consumer listeners run, so
 
 The item gap moves from a JS option (`itemsGap`) to the CSS custom property `--bf-gap`.
 
+## Build and package
+
+`npm run build` runs Vite in library mode and then `tsc -p tsconfig.build.json` (ADR-020):
+
+| Output                           | Source                                          | Package export             |
+| -------------------------------- | ----------------------------------------------- | -------------------------- |
+| `dist/badfennec-todo.js` (ESM)   | `src/lib/buildEntry.ts` → `index.ts`            | `badfennec-todo`           |
+| `dist/badfennec-todo.css`        | `src/lib/styles/todo.css` (via `buildEntry.ts`) | `badfennec-todo/style.css` |
+| `dist/index.d.ts` (+ per module) | `src/lib/index.ts`                              | `types`                    |
+
+Consumers import the stylesheet themselves (`import 'badfennec-todo/style.css'` or a `<link>`), or write their own theme.
+
 ## CSS classes and custom properties
 
 `styles/todo.css` uses flat BEM selectors. Every visual value is a `--bf-*` custom property declared on

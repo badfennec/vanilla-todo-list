@@ -3,12 +3,26 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/badfennec-todo.js"
+    },
+    "./style.css": "./dist/badfennec-todo.css"
+  },
+  "types": "./dist/index.d.ts",
+  "sideEffects": [
+    "*.css"
+  ],
   "engines": {
     "node": ">=22.12"
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && tsc -p tsconfig.build.json",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",

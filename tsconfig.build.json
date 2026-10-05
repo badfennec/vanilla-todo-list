@@ -1,0 +1,14 @@
+{
+  // Emits the library's type declarations into dist/. The JavaScript is built by Vite.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "rootDir": "src/lib",
+    "outDir": "dist"
+  },
+  // Declarations start from index.ts; buildEntry.ts only adds the stylesheet for Vite.
+  "include": ["src/lib"],
+  "exclude": ["src/**/*.test.ts", "src/lib/buildEntry.ts"]
+}

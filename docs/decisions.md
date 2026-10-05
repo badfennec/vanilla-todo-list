@@ -217,3 +217,18 @@ inherit`); the demo imports Poppins. How the CSS is shipped to consumers is deci
   the public types are exported; defaults, store and views stay internal.
 - **Consequences:** All behavior stays in units that are tested on their own; `TodoList` tests are integration tests.
   Internal units can change without breaking consumers.
+
+## ADR-020 — Library build: ES module, separate stylesheet, `tsc` declarations
+
+- **Date:** 2026-10-05 · **Status:** accepted
+- **Context:** There is no library build (D1). The stylesheet must reach consumers, and the types must ship with the
+  package. Options considered: CSS injected by the JS vs a separate file; ES only vs ES + UMD; `vite-plugin-dts` vs
+  plain `tsc` for declarations.
+- **Decision:** Vite library mode builds one ES module (`dist/badfennec-todo.js`) and extracts the default theme into
+  `dist/badfennec-todo.css`, exported as `badfennec-todo/style.css`; consumers import it on their own. Declarations
+  come from `tsc -p tsconfig.build.json` (no extra dependency). The Vite entry is `src/lib/buildEntry.ts`, which
+  imports the stylesheet and re-exports `index.ts`: this keeps CSS imports out of `index.d.ts`, where they would point
+  to a file that doesn't exist in `dist/` (an error with `noUncheckedSideEffectImports`, on by default in TS 6).
+- **Consequences:** Works with any bundler and with `<script type="module">` / `<link>` without one. No UMD build for
+  classic `<script>` users. The package stays `private` until a release is decided. `npm run build` no longer builds
+  the legacy demo; the demo build comes back in step 6.3.
