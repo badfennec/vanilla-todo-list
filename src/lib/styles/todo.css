@@ -110,7 +110,7 @@
   transition: transform var(--bf-shift-duration) ease;
 }
 
-/* The dropped item glides from where it was released to its slot: JS sets the start offset (see `landing.ts`). */
+/* A moved item (dropped, or moved with the keyboard) glides to its slot: JS sets the start offset (`landing.ts`). */
 .badfennec-todo__item--landing {
   position: relative;
   z-index: 1;

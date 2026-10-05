@@ -376,6 +376,24 @@ describe('TodoListView', () => {
     }
 
     // The key mapping is covered by keyboardTargetIndex.test.ts: these tests check the wiring.
+    it('animates the items that changed slot', () => {
+      const { root, list, press } = setupKeyboard();
+      const active = list('active');
+      active.getBoundingClientRect = () => new DOMRect(0, 1000, 300, 140);
+      // The test DOM has no layout: each item is 50px below the previous one, following the DOM order.
+      root.querySelectorAll<HTMLLIElement>('.badfennec-todo__item').forEach((item) => {
+        item.getBoundingClientRect = () => new DOMRect(0, 1000 + [...active.children].indexOf(item) * 50, 300, 40);
+      });
+      const landing = (): (string | null | undefined)[] =>
+        [...root.querySelectorAll('.badfennec-todo__item--landing')].map(
+          (item) => item.querySelector('.badfennec-todo__text')?.textContent,
+        );
+
+      press(0, 'ArrowDown'); // A and B swap, D stays
+
+      expect(landing()).toEqual(['B', 'A']);
+    });
+
     it('moves the item up and down by one with the arrows', () => {
       const { press, texts, onMove } = setupKeyboard();
 

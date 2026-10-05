@@ -1,8 +1,9 @@
 const LANDING_CLASS = 'badfennec-todo__item--landing';
 
 /**
- * Animates a dropped item from where it was released to its slot (FLIP): the item is already in its final place in the
- * layout, it starts `offset` px away from it and CSS (`--landing`) animates the transform back to none.
+ * Animates an item that just moved to a new slot (FLIP): a dropped item, or an item moved with the keyboard. The item
+ * is already in its final place in the layout, it starts `offset` px away from it and CSS (`--landing`) animates the
+ * transform back to none.
  * Returns a function that stops the animation at once; it is safe to call more than once.
  */
 export function animateLanding(element: HTMLElement, offset: number): () => void {
