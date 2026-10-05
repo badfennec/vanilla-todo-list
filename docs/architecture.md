@@ -21,11 +21,13 @@ src/
       TodoItemView.ts         # DOM of a single item, reports user intents through callbacks
       DragSession.ts          # visual state of one drag: measures, placeholder, drop index
       icons.ts                # default SVG icons
-      labels.ts               # default texts and accessible names
+      labels.ts               # default texts and accessible names, fillLabel() for {placeholders}
+      Announcer.ts            # polite live region (role="status") for screen reader announcements
     drag/
       DragController.ts       # pointer input on a handle: start / move / end / cancel
       resolveDropIndex.ts     # pure function: y + item spans + dragged index → target index
       autoScroll.ts           # pure functions: edge scroll speed, closest scroll container
+      keyboardTargetIndex.ts  # pure function: reordering key + index → target index
       AutoScroller.ts         # animation-frame loop that scrolls while the pointer is near an edge
     styles/
       todo.css                # BEM classes + --bf-* custom properties
@@ -47,6 +49,7 @@ in step 6.5.
 | `TypedEmitter`     | Listener registry with typed event map                                                    | Know about todos                |
 | `TodoListView`     | Containers, creating/removing/reordering item views from store state, wiring drags        | Decide order or mutate data     |
 | `DragSession`      | One drag's measures, placeholder and drop index (created at start, finished at the end)   | Handle pointer input            |
+| `Announcer`        | The live region and its text                                                              | Know what is announced or why   |
 | `TodoItemView`     | One item's elements, a11y attributes, text input debounce                                 | Know its siblings or its parent |
 | `DragController`   | Pointer Events, pointer capture, visual translate of the dragged element                  | Compute the drop position       |
 | `resolveDropIndex` | Drop math (pure, unit-tested)                                                             | Read the DOM                    |
@@ -190,9 +193,10 @@ Default icons live in `view/icons.ts` (`DEFAULT_ICONS`), keyed like `TodoIcons`.
 ## Keyboard reordering
 
 With the focus on an active item's handle, `↑` / `↓` move the item by one position and `Home` / `End` move it to the
-first / last position (no modifiers). `TodoListView` reports `onMove(id, toIndex)` like a drop, keeps the focus on the
-moved handle after the re-render, and announces the new position in a `role="status"` live region (`moved` label).
-See ADR-018.
+first / last position (no modifiers). The key mapping is the pure function `keyboardTargetIndex` (clamped to the
+list). `TodoListView` reports `onMove(id, toIndex)` like a drop, keeps the focus on the moved handle after the
+re-render, and announces the new position through its `Announcer` (`moved` label, filled by `fillLabel`).
+See ADR-018 and ADR-025.
 
 ## Open points (to decide during the refactor)
 

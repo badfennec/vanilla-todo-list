@@ -1,6 +1,9 @@
 import { DragController } from '../drag/DragController';
+import { keyboardTargetIndex } from '../drag/keyboardTargetIndex';
 import type { TodoIcons, TodoItem, TodoLabels } from '../model/types';
+import { Announcer } from './Announcer';
 import { DragSession } from './DragSession';
+import { fillLabel } from './labels';
 import { TodoItemView } from './TodoItemView';
 
 export interface TodoListViewOptions {
@@ -43,8 +46,8 @@ export class TodoListView {
   readonly #activeList: HTMLUListElement;
   readonly #completedList: HTMLUListElement;
   readonly #addButton: HTMLButtonElement;
-  /** Live region announcing keyboard moves to screen readers. */
-  readonly #status: HTMLDivElement;
+  /** Announces keyboard moves to screen readers. */
+  readonly #announcer = new Announcer();
   readonly #movedLabel: string;
   readonly #entries = new Map<string, Entry>();
   readonly #itemOptions: Omit<TodoListViewOptions, 'root' | 'onAdd' | 'onMove'>;
@@ -67,12 +70,9 @@ export class TodoListView {
     this.#activeList.addEventListener('keydown', this.#handleKeyDown);
 
     this.#movedLabel = itemOptions.labels.moved;
-    this.#status = document.createElement('div');
-    this.#status.className = 'badfennec-todo__status';
-    this.#status.setAttribute('role', 'status');
 
     this.#root.classList.add('badfennec-todo');
-    this.#root.append(this.#activeList, this.#addButton, this.#completedList, this.#status);
+    this.#root.append(this.#activeList, this.#addButton, this.#completedList, this.#announcer.element);
   }
 
   /** Creates, updates and removes item views so that the lists show exactly these items, in this order. */
@@ -148,7 +148,7 @@ export class TodoListView {
     this.#activeList.remove();
     this.#addButton.remove();
     this.#completedList.remove();
-    this.#status.remove();
+    this.#announcer.destroy();
     this.#root.classList.remove('badfennec-todo');
   }
 
@@ -156,9 +156,9 @@ export class TodoListView {
     this.#onAdd();
   };
 
-  /** Keyboard reordering on a focused handle: ↑/↓ move by one, Home/End to the first/last position. */
+  /** Keyboard reordering on a focused handle (see `keyboardTargetIndex` for the keys). */
   readonly #handleKeyDown = (event: KeyboardEvent): void => {
-    if (this.#drag || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
+    if (this.#drag) {
       return;
     }
 
@@ -169,21 +169,19 @@ export class TodoListView {
     }
 
     const lastIndex = this.#active.length - 1;
-    const toIndex = keyTargets(fromIndex, lastIndex)[event.key];
+    const toIndex = keyboardTargetIndex(event, fromIndex, lastIndex);
     if (toIndex === undefined) {
       return;
     }
 
     // Also keeps the arrows from scrolling the page at the first or last position.
     event.preventDefault();
-    if (toIndex < 0 || toIndex > lastIndex || toIndex === fromIndex) {
+    if (toIndex === fromIndex) {
       return;
     }
 
     this.#onMove(item.id, toIndex);
-    this.#status.textContent = this.#movedLabel
-      .replace('{position}', String(toIndex + 1))
-      .replace('{total}', String(lastIndex + 1));
+    this.#announcer.announce(fillLabel(this.#movedLabel, { position: toIndex + 1, total: lastIndex + 1 }));
   };
 
   #createEntry(item: TodoItem): Entry {
@@ -245,10 +243,6 @@ export class TodoListView {
 
     return drag;
   }
-}
-
-function keyTargets(index: number, lastIndex: number): Partial<Record<string, number>> {
-  return { ArrowUp: index - 1, ArrowDown: index + 1, Home: 0, End: lastIndex };
 }
 
 function destroyEntry({ view, drag }: Entry): void {

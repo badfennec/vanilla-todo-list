@@ -83,4 +83,4 @@ When a step is done:
 | [x]  | 7.5  | Repository URL: `git clone` in the README, `repository` / `homepage` / `bugs` | —        | `docs: add repository url`                      |
 | [x]  | 7.6  | Move `@fontsource/poppins` to devDependencies (only the demo uses it)         | C6       | `chore: move poppins to dev dependencies`       |
 | [x]  | 7.7  | Extract `DragSession` from `TodoListView` (one instance per drag)             | —        | `refactor: extract drag session from list view` |
-| [ ]  | 7.8  | Extract keyboard reordering (`keyboardTargetIndex`) and the live `Announcer`  | —        | `refactor: extract keyboard reordering`         |
+| [x]  | 7.8  | Extract keyboard reordering (`keyboardTargetIndex`) and the live `Announcer`  | —        | `refactor: extract keyboard reordering`         |

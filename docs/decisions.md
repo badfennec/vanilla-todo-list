@@ -282,3 +282,15 @@ inherit`); the demo imports Poppins. How the CSS is shipped to consumers is deci
 - **Decision:** Keep each test next to the file it tests, as `*.test.ts` (the Vite / Vitest convention).
 - **Consequences:** Short imports, tests move and get renamed with their module, and a module without tests is easy to
   spot. Tests never reach the package: `tsconfig.build.json` excludes them and Vite builds from `buildEntry.ts` only.
+
+## ADR-025 — Keyboard reordering and announcements out of `TodoListView`
+
+- **Date:** 2026-10-05 · **Status:** accepted
+- **Context:** After ADR-023, `TodoListView` still mapped keys to indexes, built the announcement text and owned the
+  live region element.
+- **Decision:** The key mapping is the pure function `drag/keyboardTargetIndex.ts`: it returns the target index
+  clamped to the list, or `undefined` for keys that don't reorder or have a modifier. The live region is
+  `view/Announcer.ts` (`element`, `announce()`, `destroy()`). Label placeholders are filled by `fillLabel()` in
+  `view/labels.ts`. `TodoListView` only finds the focused handle, prevents the default action and wires these
+  together. Behavior is unchanged (ADR-018).
+- **Consequences:** Each part is unit-tested on its own; `TodoListView` keeps containers, reconciliation and wiring.
