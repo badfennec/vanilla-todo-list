@@ -1,0 +1,5 @@
+# Legacy code is a reference only and is removed in step 6.5.
+badfennec-todo/
+assets/
+
+package-lock.json

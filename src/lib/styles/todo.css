@@ -1,0 +1,196 @@
+/*
+ * BadFennec Todo default theme.
+ * Flat BEM selectors; every visual value is a --bf-* custom property, so consumers theme the list by overriding
+ * them on .badfennec-todo (or any ancestor with higher specificity).
+ */
+
+.badfennec-todo {
+  --bf-font-family: inherit;
+  --bf-gap: 10px;
+  --bf-section-gap: 20px;
+  --bf-padding: 20px;
+  --bf-bg: #f9f9f9;
+  --bf-item-bg: #fff;
+  --bf-text-color: inherit;
+  --bf-completed-color: #888;
+  --bf-border-color: #ddd;
+  --bf-radius: 5px;
+  --bf-shadow: 0 2px 5px rgb(0 0 0 / 10%);
+  --bf-shadow-dragging: 0 10px 20px rgb(0 0 0 / 20%);
+  --bf-icon-size: 18px;
+  --bf-focus-color: #2563eb;
+
+  display: grid;
+  gap: var(--bf-section-gap);
+  padding: var(--bf-padding);
+  font-family: var(--bf-font-family);
+  line-height: 1.2;
+  color: var(--bf-text-color);
+  background-color: var(--bf-bg);
+}
+
+.badfennec-todo--dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+/* Lists: active items first, completed items after. */
+
+.badfennec-todo__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bf-gap);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.badfennec-todo__list--active {
+  /* The dragged item is positioned inside the active list. */
+  position: relative;
+}
+
+.badfennec-todo__list:empty {
+  display: none;
+}
+
+/* Item */
+
+.badfennec-todo__item,
+.badfennec-todo__add {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px;
+}
+
+.badfennec-todo__item {
+  background-color: var(--bf-item-bg);
+  border: 1px solid var(--bf-border-color);
+  border-radius: var(--bf-radius);
+  box-shadow: var(--bf-shadow);
+  transition:
+    box-shadow 0.3s ease,
+    opacity 0.3s ease;
+}
+
+.badfennec-todo__item--completed {
+  color: var(--bf-completed-color);
+}
+
+.badfennec-todo__item--dragging {
+  /* Out of the flow while dragging: JS sets only `top` and `transform`. */
+  position: absolute;
+  inset-inline: 0;
+  z-index: 1;
+  opacity: 0.8;
+  box-shadow: var(--bf-shadow-dragging);
+}
+
+/* Keeps the slot of the dragged item; JS sets its height to the item's height. */
+.badfennec-todo__placeholder {
+  box-sizing: border-box;
+  border: 2px dashed var(--bf-border-color);
+  border-radius: var(--bf-radius);
+}
+
+/* Icon buttons (real <button> elements) */
+
+.badfennec-todo__button {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--bf-icon-size);
+  block-size: var(--bf-icon-size);
+  padding: 0;
+  margin: 0;
+  color: inherit;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  border-radius: 2px;
+}
+
+.badfennec-todo__icon {
+  display: flex;
+  flex: none;
+  inline-size: var(--bf-icon-size);
+  block-size: var(--bf-icon-size);
+}
+
+.badfennec-todo__button svg,
+.badfennec-todo__button img,
+.badfennec-todo__icon svg,
+.badfennec-todo__icon img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.badfennec-todo__button:focus-visible,
+.badfennec-todo__text:focus-visible,
+.badfennec-todo__add:focus-visible {
+  outline: 2px solid var(--bf-focus-color);
+  outline-offset: 2px;
+}
+
+.badfennec-todo__handle {
+  cursor: grab;
+  touch-action: none;
+}
+
+.badfennec-todo--dragging .badfennec-todo__handle {
+  cursor: grabbing;
+}
+
+/* Live region for screen readers: present in the accessibility tree, invisible on screen. */
+.badfennec-todo__status {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  white-space: nowrap;
+  clip-path: inset(50%);
+  border: 0;
+}
+
+/* Only active items can be moved: keep the slot so the layout doesn't shift. */
+.badfennec-todo__item--completed .badfennec-todo__handle {
+  visibility: hidden;
+}
+
+/* Text */
+
+.badfennec-todo__text {
+  flex: 1;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.badfennec-todo__item--completed .badfennec-todo__text {
+  text-decoration: line-through;
+}
+
+/* Add-new-item row: a single <button> with the icon and the visible label. */
+
+.badfennec-todo__add {
+  inline-size: 100%;
+  font: inherit;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  border-radius: var(--bf-radius);
+}
+
+/* An empty slot where items have the handle, so the add icon lines up with the toggles. */
+
+.badfennec-todo__add::before {
+  flex: none;
+  inline-size: var(--bf-icon-size);
+  content: '';
+}
