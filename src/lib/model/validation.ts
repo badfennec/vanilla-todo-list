@@ -80,6 +80,38 @@ export function parseOptions(value: unknown = {}): ParsedTodoOptions {
   };
 }
 
+/**
+ * Resolves the element the list renders into, from an element or a CSS selector.
+ * @throws {TypeError} if the value is neither, or if the selector matches no HTML element.
+ */
+export function parseTarget(value: unknown): HTMLElement {
+  if (value instanceof HTMLElement) {
+    return value;
+  }
+  if (typeof value !== 'string') {
+    throw new TypeError('target must be an HTMLElement or a CSS selector');
+  }
+
+  const element = document.querySelector(value);
+  if (!(element instanceof HTMLElement)) {
+    throw new TypeError(`target "${value}" matches no HTML element`);
+  }
+
+  return element;
+}
+
+/**
+ * Checks a string argument of a public method (an id or a text).
+ * @throws {TypeError} if the value is not a string.
+ */
+export function parseString(value: unknown, path: string): string {
+  if (typeof value !== 'string') {
+    throw new TypeError(`${path} must be a string`);
+  }
+
+  return value;
+}
+
 /** Validates the fields of an item without generating the id. */
 function parseItemFields(value: unknown, path: string): Omit<TodoItem, 'id'> & { id: string | undefined } {
   if (!isRecord(value)) {

@@ -25,7 +25,7 @@ Status: `open` until the refactor step that resolves it is done, then `resolved 
 | ID  | Problem                                                                                                                                                                                                       | Status              |
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
 | B1  | **The DOM is the source of truth.** `sort.js` rebuilds the array order from `getBoundingClientRect()`. No model/view separation.                                                                              | open                |
-| B2  | **God object** `BadFennecTodo`: it owns state, drag state (`delta`, `dragY`, `draggingItem`), DOM creation, events and the completed-container logic.                                                         | open                |
+| B2  | **God object** `BadFennecTodo`: it owns state, drag state (`delta`, `dragY`, `draggingItem`), DOM creation, events and the completed-container logic.                                                         | resolved (step 6.1) |
 | B3  | **Circular coupling**: `TodoItem`, `DragEvents` and `DragIntersector` all receive the parent `ToDo` and read and write its internals (`draggingItem`, `el.style.cursor`, `items`, `dragY`…).                  | resolved (step 5.2) |
 | B4  | **Fake reactivity**: `Reactive` is a misused event bus. Its `value` is never read, state is duplicated three times (`text` / `oldText` / `reactive.value.text`), and `subscribe` fires immediately.           | resolved (step 3.4) |
 | B5  | `Events`: one callback per event (each call overwrites the previous one), no `off()`, one copy-pasted method per event.                                                                                       | resolved (step 3.3) |
@@ -34,7 +34,7 @@ Status: `open` until the refactor step that resolves it is done, then `resolved 
 | B8  | Constructors with 15+ loose arguments (`TodoItem`). Defaults (icons) are scattered across 3 files.                                                                                                            | resolved (step 4.2) |
 | B9  | Everything is public and mutable. Dead code: `rect`, `draggingItemOriginY`, `index`/`setIndex`, `middleHeight`, `marginBottom`, `spaceAvailableHeight`, the unused `deltaY` in `#move`, commented-out blocks. | open                |
 | B10 | Misleading names: the "deltaY" passed around is actually the absolute `clientY`. `onUpdate` means toggle.                                                                                                     | resolved (step 5.1) |
-| B11 | The public API is only `on()`. Missing: `add`, `remove`, `getItems`, `setItems`, `destroy`, `off`.                                                                                                            | open                |
+| B11 | The public API is only `on()`. Missing: `add`, `remove`, `getItems`, `setItems`, `destroy`, `off`.                                                                                                            | resolved (step 6.1) |
 | B12 | No input validation: a selector that matches nothing crashes later with an unclear error.                                                                                                                     | open                |
 
 ## C. UI / accessibility / CSS

@@ -205,3 +205,15 @@ inherit`); the demo imports Poppins. How the CSS is shipped to consumers is deci
   `role="status"` live region, with the new `moved` label (`{position}` / `{total}` placeholders).
 - **Consequences:** No intermediate state to manage or cancel. Arrow keys are consumed on the handle even at the
   edges, so they never scroll the page from there.
+
+## ADR-019 — `TodoList` facade: thin wiring, validated arguments
+
+- **Date:** 2026-10-05 · **Status:** accepted
+- **Context:** The legacy public API is only `on()` (B11), and the main class holds everything (B2).
+- **Decision:** `TodoList` only validates input and wires units: it resolves the target (`parseTarget`), parses the
+  options, merges icons and labels with the defaults, creates the store and the view, maps view intents to store
+  mutations, and re-renders on `change`. Its methods delegate to the store, return the resulting item, and check
+  their string arguments at runtime (`parseString`). Events are the store's (`TodoListEvents`). Only `TodoList` and
+  the public types are exported; defaults, store and views stay internal.
+- **Consequences:** All behavior stays in units that are tested on their own; `TodoList` tests are integration tests.
+  Internal units can change without breaking consumers.

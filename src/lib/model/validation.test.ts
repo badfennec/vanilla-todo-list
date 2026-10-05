@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { parseItem, parseItems, parseOptions } from './validation';
+import { parseItem, parseItems, parseOptions, parseString, parseTarget } from './validation';
 
 type UUID = ReturnType<typeof crypto.randomUUID>;
 
@@ -132,5 +132,46 @@ describe('parseOptions', () => {
     expect(() => parseOptions({ items: [{ completed: 1 }] })).toThrow(
       new TypeError('options.items[0].completed must be a boolean'),
     );
+  });
+});
+
+describe('parseTarget', () => {
+  afterEach(() => {
+    document.body.replaceChildren();
+  });
+
+  it('accepts an element', () => {
+    const element = document.createElement('div');
+
+    expect(parseTarget(element)).toBe(element);
+  });
+
+  it('resolves a selector', () => {
+    const element = document.createElement('div');
+    element.id = 'todo';
+    document.body.append(element);
+
+    expect(parseTarget('#todo')).toBe(element);
+  });
+
+  it('rejects a selector that matches nothing', () => {
+    expect(() => parseTarget('#missing')).toThrow(new TypeError('target "#missing" matches no HTML element'));
+  });
+
+  it('rejects other values', () => {
+    expect(() => parseTarget(null)).toThrow(new TypeError('target must be an HTMLElement or a CSS selector'));
+    expect(() => parseTarget(42)).toThrow(TypeError);
+  });
+});
+
+describe('parseString', () => {
+  it('accepts strings, empty included', () => {
+    expect(parseString('a', 'id')).toBe('a');
+    expect(parseString('', 'text')).toBe('');
+  });
+
+  it('rejects other values', () => {
+    expect(() => parseString(1, 'id')).toThrow(new TypeError('id must be a string'));
+    expect(() => parseString(undefined, 'text')).toThrow(new TypeError('text must be a string'));
   });
 });

@@ -107,28 +107,35 @@ type TodoItem = { id: string; text: string; completed: boolean };
 4. If the user leaves the text still empty, the item view reports `onDelete(id)`, so `TodoList` calls `store.remove(id)`
    and the store emits `remove`. Existing items that the user empties are kept (see ADR-014).
 
-## Public API (draft)
+## Public API
+
+Exported from `src/lib/index.ts`: the `TodoList` class and the types `TodoListEvents`, `Listener`, `TodoItem`,
+`TodoItemInput`, `TodoIcons`, `TodoLabels`, `TodoOptions`.
 
 ```ts
 const todo = new TodoList(element | selector, {
-  items?: TodoItemInput[],    // validated at runtime by validation.ts
-  icons?: Partial<TodoIcons>,
-  labels?: Partial<TodoLabels>, // e.g. "Add new item", aria labels
+  items?: TodoItemInput[],      // validated at runtime by validation.ts
+  icons?: Partial<TodoIcons>,   // merged with DEFAULT_ICONS
+  labels?: Partial<TodoLabels>, // merged with DEFAULT_LABELS (visible texts and accessible names)
 });
 
 todo.add(text?: string): TodoItem;
-todo.remove(id: string): void;
-todo.toggle(id: string): void;
-todo.edit(id: string, text: string): void;
-todo.move(id: string, toIndex: number): void;
-todo.getItems(): TodoItem[];     // copies, in display order
+todo.remove(id: string): TodoItem;
+todo.toggle(id: string): TodoItem;
+todo.edit(id: string, text: string): TodoItem;
+todo.move(id: string, toIndex: number): TodoItem;
+todo.getItems(): readonly TodoItem[];  // frozen items, in display order
 todo.setItems(items: TodoItemInput[]): void;
 
-todo.on('change', ({ items }) => {}); // any mutation
-todo.on('add' | 'remove' | 'toggle' | 'edit' | 'move', (payload) => {});
+const off = todo.on('change', ({ items }) => {}); // any mutation; returns an unsubscribe function
+todo.on('add' | 'remove' | 'toggle' | 'edit', ({ item }) => {});
+todo.on('move', ({ item, fromIndex, toIndex }) => {});
 todo.off(event, listener);
-todo.destroy();
+todo.destroy();                        // removes listeners and DOM, keeps the target element
 ```
+
+Method arguments are checked at runtime (`parseString`), since consumers may call them from plain JS. Mutations
+return the resulting item. The view re-renders before consumer listeners run, so they see an up-to-date DOM.
 
 The item gap moves from a JS option (`itemsGap`) to the CSS custom property `--bf-gap`.
 
