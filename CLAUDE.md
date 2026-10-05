@@ -61,7 +61,8 @@ app. It was refactored from a legacy vanilla JS version (removed in step 6.5; se
 - Never check numbers with `||` for "missing" values (0 is valid). Use `??` or explicit checks.
 - BEM class names with the `badfennec-todo` block (`badfennec-todo__item--completed`).
 - Pure logic (store, drop resolver) is covered by unit tests (Vitest + happy-dom). Tests live next to the source
-  file they test, as `*.test.ts` (ADR-024).
+  file they test, as `*.test.ts` (ADR-024). Test each behavior once: a unit's logic in its own tests, and in the
+  tests of the class that uses it only the wiring (the unit is called, with the right data).
 
 ## Docs
 

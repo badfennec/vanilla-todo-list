@@ -7,9 +7,9 @@ import { TodoItemView } from './TodoItemView';
 
 const ITEM: TodoItem = { id: 'a', text: 'Buy milk', completed: false };
 
-function setup(item: TodoItem = ITEM) {
+function setup(item: TodoItem = ITEM, options: { editDelay?: number } = {}) {
   const callbacks = { onToggle: vi.fn(), onEdit: vi.fn(), onDelete: vi.fn() };
-  const view = new TodoItemView({ item, icons: DEFAULT_ICONS, labels: DEFAULT_LABELS, ...callbacks });
+  const view = new TodoItemView({ item, icons: DEFAULT_ICONS, labels: DEFAULT_LABELS, ...callbacks, ...options });
   document.body.append(view.element);
 
   const query = <T extends Element>(selector: string, type: new () => T): T => {
@@ -61,8 +61,6 @@ describe('TodoItemView', () => {
     expect(handle.getAttribute('aria-label')).toBe(DEFAULT_LABELS.drag);
     expect(toggle.getAttribute('aria-label')).toBe(DEFAULT_LABELS.toggle);
     expect(remove.getAttribute('aria-label')).toBe(DEFAULT_LABELS.delete);
-    expect(text.getAttribute('contenteditable')).toBe('plaintext-only');
-    expect(text.getAttribute('role')).toBe('textbox');
     expect(text.getAttribute('aria-label')).toBe(DEFAULT_LABELS.text);
     expect(text.textContent).toBe('Buy milk');
   });
@@ -87,55 +85,16 @@ describe('TodoItemView', () => {
     expect(view.element.isConnected).toBe(true);
   });
 
-  it('reports a text change after the edit delay', () => {
-    const { text, onEdit } = setup();
+  // Text editing itself (debounce, blur, Enter, line breaks) is covered by EditableText.test.ts.
+  it('reports text changes with the item id, after its edit delay', () => {
+    const { text, onEdit } = setup(ITEM, { editDelay: 100 });
 
-    type(text, 'Buy');
-    vi.advanceTimersByTime(200);
-    type(text, 'Buy oat milk');
-    vi.advanceTimersByTime(299);
+    type(text, 'Buy bread');
+    vi.advanceTimersByTime(99);
     expect(onEdit).not.toHaveBeenCalled();
 
     vi.advanceTimersByTime(1);
-    expect(onEdit).toHaveBeenCalledExactlyOnceWith('a', 'Buy oat milk');
-  });
-
-  it('reports a pending text change at once on blur', () => {
-    const { text, onEdit } = setup();
-
-    type(text, 'Buy bread');
-    text.dispatchEvent(new Event('blur'));
-    vi.runAllTimers();
-
     expect(onEdit).toHaveBeenCalledExactlyOnceWith('a', 'Buy bread');
-  });
-
-  it('does not report unchanged text', () => {
-    const { text, onEdit } = setup();
-
-    type(text, 'Buy milk');
-    vi.runAllTimers();
-    text.dispatchEvent(new Event('blur'));
-
-    expect(onEdit).not.toHaveBeenCalled();
-  });
-
-  it('confirms the text on Enter instead of adding a line break', () => {
-    const { text } = setup();
-    const event = new KeyboardEvent('keydown', { key: 'Enter', cancelable: true });
-
-    text.dispatchEvent(event);
-
-    expect(event.defaultPrevented).toBe(true);
-  });
-
-  it('replaces pasted line breaks with spaces', () => {
-    const { text, onEdit } = setup();
-
-    type(text, 'Buy\nmilk\r\nand eggs');
-    vi.runAllTimers();
-
-    expect(onEdit).toHaveBeenCalledExactlyOnceWith('a', 'Buy milk and eggs');
   });
 
   it('renders a new state of the item on update', () => {
@@ -147,16 +106,6 @@ describe('TodoItemView', () => {
     expect(toggle.getAttribute('aria-pressed')).toBe('true');
     expect(toggle.innerHTML).toBe(serialized(DEFAULT_ICONS.checked));
     expect(text.textContent).toBe('Buy coffee');
-  });
-
-  it('does not rewrite the text while the user is typing in it', () => {
-    const { view, text } = setup();
-
-    text.focus();
-    type(text, 'Buy m');
-    view.update({ ...ITEM, text: 'Changed elsewhere' });
-
-    expect(text.textContent).toBe('Buy m');
   });
 
   it('focuses the text of a new item', () => {

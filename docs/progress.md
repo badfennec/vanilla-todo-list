@@ -85,3 +85,4 @@ When a step is done:
 | [x]  | 7.7  | Extract `DragSession` from `TodoListView` (one instance per drag)             | —        | `refactor: extract drag session from list view`  |
 | [x]  | 7.8  | Extract keyboard reordering (`keyboardTargetIndex`) and the live `Announcer`  | —        | `refactor: extract keyboard reordering`          |
 | [x]  | 7.9  | Extract `EditableText` from `TodoItemView` (text editing, no todo knowledge)  | —        | `refactor: extract editable text from item view` |
+| [x]  | 7.10 | Remove tests duplicated by the extracted units' own tests (wiring tests only) | —        | `test: remove duplicated view tests`             |

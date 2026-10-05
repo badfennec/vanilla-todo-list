@@ -42,13 +42,12 @@ describe('TodoListView', () => {
     document.body.replaceChildren();
   });
 
-  it('renders the active list, the add row, the completed list and a status region into the root', () => {
+  it('renders the active list, the add row, the completed list and the live region into the root', () => {
     const { root, list, addButton } = setup();
     const status = root.querySelector('.badfennec-todo__status');
 
     expect(root.classList.contains('badfennec-todo')).toBe(true);
     expect([...root.children]).toEqual([list('active'), addButton(), list('completed'), status]);
-    expect(status?.getAttribute('role')).toBe('status');
   });
 
   it('renders the add row as a button with a visible label', () => {
@@ -207,33 +206,15 @@ describe('TodoListView', () => {
       return { ...context, pointer, item, placeholder, activeChildren, scrollPage };
     }
 
-    it('puts a placeholder in the slot of the dragged item and takes the item out of the flow', () => {
-      const { root, pointer, item, placeholder, activeChildren } = setupDrag();
-      const dragged = item(1);
+    // Measures, placeholder and drop index are covered by DragSession.test.ts: these tests check the wiring.
+    it('starts a drag session on pointer down', () => {
+      const { root, pointer, item, placeholder } = setupDrag();
 
       pointer(1, 'pointerdown', 500);
 
-      expect(activeChildren()).toEqual([item(0), placeholder(), dragged, item(2)]);
-      expect(placeholder()?.getAttribute('aria-hidden')).toBe('true');
-      expect((placeholder() as HTMLElement).style.blockSize).toBe('40px');
-      expect(dragged.classList.contains('badfennec-todo__item--dragging')).toBe(true);
-      expect(dragged.style.top).toBe('50px');
+      expect(placeholder()).not.toBeNull();
+      expect(item(1).classList.contains('badfennec-todo__item--dragging')).toBe(true);
       expect(root.classList.contains('badfennec-todo--dragging')).toBe(true);
-    });
-
-    it('moves the placeholder once the dragged middle passes another middle', () => {
-      const { pointer, item, placeholder, activeChildren } = setupDrag();
-      const [a, b, d] = [item(0), item(1), item(2)];
-
-      pointer(0, 'pointerdown', 500);
-      pointer(0, 'pointermove', 549); // middle at 69: still before B
-      expect(activeChildren()).toEqual([placeholder(), a, b, d]);
-
-      pointer(0, 'pointermove', 551); // middle at 71: after B
-      expect(activeChildren()).toEqual([a, b, placeholder(), d]);
-
-      pointer(0, 'pointermove', 700); // past D: last
-      expect(activeChildren()).toEqual([a, b, d, placeholder()]);
     });
 
     it('reports the drop index and restores the DOM on pointer up', () => {
@@ -251,16 +232,6 @@ describe('TodoListView', () => {
       expect(d.style.top).toBe('');
       expect(d.style.transform).toBe('');
       expect(root.classList.contains('badfennec-todo--dragging')).toBe(false);
-    });
-
-    it('measures relative to the list, so the page position does not matter (A9)', () => {
-      const { pointer, onMove } = setupDrag();
-
-      pointer(0, 'pointerdown', 0);
-      pointer(0, 'pointermove', 51);
-      pointer(0, 'pointerup', 51);
-
-      expect(onMove).toHaveBeenCalledExactlyOnceWith('a', 1);
     });
 
     it('keeps the drop position in sync when the page scrolls during a drag (A9)', () => {
@@ -376,6 +347,7 @@ describe('TodoListView', () => {
       return { ...context, press, status };
     }
 
+    // The key mapping is covered by keyboardTargetIndex.test.ts: these tests check the wiring.
     it('moves the item up and down by one with the arrows', () => {
       const { press, texts, onMove } = setupKeyboard();
 
@@ -386,16 +358,6 @@ describe('TodoListView', () => {
       press(2, 'ArrowUp');
       expect(onMove).toHaveBeenLastCalledWith('d', 1);
       expect(texts('active')).toEqual(['B', 'D', 'A']);
-    });
-
-    it('moves the item to the first or last position with Home and End', () => {
-      const { press, onMove } = setupKeyboard();
-
-      press(2, 'Home');
-      expect(onMove).toHaveBeenLastCalledWith('d', 0);
-
-      press(0, 'End');
-      expect(onMove).toHaveBeenLastCalledWith('d', 2);
     });
 
     it('keeps focus on the handle of the moved item', () => {
@@ -429,12 +391,11 @@ describe('TodoListView', () => {
       expect(status()).toBe('');
     });
 
-    it('ignores other keys, modifiers and keys outside the handle', () => {
+    it('ignores keys that do not reorder, and keys pressed outside a handle', () => {
       const { root, press, onMove } = setupKeyboard();
 
-      press(0, 'Enter');
-      press(0, 'ArrowDown', { altKey: true });
-      press(0, 'ArrowDown', { shiftKey: true });
+      const enter = press(0, 'Enter');
+      expect(enter.defaultPrevented).toBe(false);
       root
         .querySelector('.badfennec-todo__toggle')
         ?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
