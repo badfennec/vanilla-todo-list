@@ -260,3 +260,25 @@ inherit`); the demo imports Poppins. How the CSS is shipped to consumers is deci
   ADR-021.
 - **Consequences:** Every position is reachable with mouse, touch and pen. The speed is per frame, so it is faster on
   high refresh rate screens; acceptable for now. The scroll container is found once per drag.
+
+## ADR-023 — `DragSession`: one object per drag, out of `TodoListView`
+
+- **Date:** 2026-10-05 · **Status:** accepted
+- **Context:** A review for SRP found `TodoListView` with four responsibilities: containers, reconciling item views,
+  the visual state of a drag (measures, placeholder, drop index) and keyboard reordering. The drag state was a
+  long-lived field that only made sense during a drag, and `render()` and the keyboard handler had to check it.
+  `TodoList` was reviewed too and kept as is: it only validates and delegates (ADR-019).
+- **Decision:** The visual drag state moves to `view/DragSession.ts`. `TodoListView` creates a session in the drag
+  controller's `onStart`, forwards `onMove` to it, and calls `finish()` on end or cancel, reading `fromIndex` and
+  `index` to report the move. Keyboard reordering is extracted in a following step (7.8).
+- **Consequences:** No drag state outlives the drag by construction. `TodoListView` goes from 339 to about 290
+  lines, and the drag visuals are unit-tested without pointer events.
+
+## ADR-024 — Tests next to the source
+
+- **Date:** 2026-10-05 · **Status:** accepted
+- **Context:** Moving all tests into a `tests/` folder mirroring `src/lib` was considered, to keep `src/` for shipped
+  code only.
+- **Decision:** Keep each test next to the file it tests, as `*.test.ts` (the Vite / Vitest convention).
+- **Consequences:** Short imports, tests move and get renamed with their module, and a module without tests is easy to
+  spot. Tests never reach the package: `tsconfig.build.json` excludes them and Vite builds from `buildEntry.ts` only.

@@ -60,7 +60,8 @@ app. It was refactored from a legacy vanilla JS version (removed in step 6.5; se
 - Accessibility is required: real `<button>`s, `aria-*` attributes, keyboard support.
 - Never check numbers with `||` for "missing" values (0 is valid). Use `??` or explicit checks.
 - BEM class names with the `badfennec-todo` block (`badfennec-todo__item--completed`).
-- Pure logic (store, drop resolver) is covered by unit tests (Vitest + happy-dom).
+- Pure logic (store, drop resolver) is covered by unit tests (Vitest + happy-dom). Tests live next to the source
+  file they test, as `*.test.ts` (ADR-024).
 
 ## Docs
 

@@ -1,6 +1,6 @@
 import { DragController } from '../drag/DragController';
-import { resolveDropIndex, type VerticalSpan } from '../drag/resolveDropIndex';
 import type { TodoIcons, TodoItem, TodoLabels } from '../model/types';
+import { DragSession } from './DragSession';
 import { TodoItemView } from './TodoItemView';
 
 export interface TodoListViewOptions {
@@ -27,18 +27,10 @@ interface ActiveItem {
   readonly element: HTMLLIElement;
 }
 
-/** State of the current drag; it exists only between start and end/cancel. */
-interface DragState {
+/** The drag in progress: which item, and its visual session. */
+interface ActiveDrag {
   readonly id: string;
-  readonly element: HTMLLIElement;
-  readonly placeholder: HTMLLIElement;
-  /** Active items measured at drag start, relative to the active list (so page scroll doesn't matter). */
-  readonly spans: readonly VerticalSpan[];
-  readonly fromIndex: number;
-  readonly startTop: number;
-  readonly height: number;
-  /** Drop index the placeholder currently shows. */
-  index: number;
+  readonly session: DragSession;
 }
 
 /**
@@ -60,7 +52,7 @@ export class TodoListView {
   readonly #onMove: (id: string, toIndex: number) => void;
   /** Active items of the last render, in display order. */
   #active: readonly ActiveItem[] = [];
-  #drag: DragState | undefined;
+  #drag: ActiveDrag | undefined;
 
   constructor({ root, onAdd, onMove, ...itemOptions }: TodoListViewOptions) {
     this.#root = root;
@@ -208,7 +200,7 @@ export class TodoListView {
         this.#startDrag(id);
       },
       onMove: (offsetY) => {
-        this.#moveDrag(offsetY);
+        this.#drag?.session.move(offsetY);
       },
       onEnd: () => {
         this.#endDrag();
@@ -223,72 +215,35 @@ export class TodoListView {
 
   #startDrag(id: string): void {
     const fromIndex = this.#active.findIndex((active) => active.id === id);
-    const listTop = this.#activeList.getBoundingClientRect().top;
-    const spans = this.#active.map(({ element }) => {
-      const rect = element.getBoundingClientRect();
-      return { top: rect.top - listTop, bottom: rect.bottom - listTop };
+    if (fromIndex === -1) {
+      return;
+    }
+
+    const session = new DragSession({
+      root: this.#root,
+      list: this.#activeList,
+      elements: this.#active.map(({ element }) => element),
+      fromIndex,
     });
-    const span = spans[fromIndex];
-    const element = this.#active[fromIndex]?.element;
-    if (!span || !element) {
-      return;
-    }
-
-    const height = span.bottom - span.top;
-    const placeholder = document.createElement('li');
-    placeholder.className = 'badfennec-todo__placeholder';
-    placeholder.setAttribute('aria-hidden', 'true');
-    placeholder.style.blockSize = `${String(height)}px`;
-    element.before(placeholder);
-
-    // The item leaves the flow (CSS) and stays where it was; the placeholder keeps its slot.
-    element.style.top = `${String(span.top)}px`;
-    element.classList.add('badfennec-todo__item--dragging');
-    this.#root.classList.add('badfennec-todo--dragging');
-
-    this.#drag = { id, element, placeholder, spans, fromIndex, startTop: span.top, height, index: fromIndex };
-  }
-
-  #moveDrag(offsetY: number): void {
-    const drag = this.#drag;
-    if (!drag) {
-      return;
-    }
-
-    // The middle of the dragged item, not the pointer: the handle is near the top of the item.
-    const y = drag.startTop + offsetY + drag.height / 2;
-    const index = resolveDropIndex(y, drag.spans, drag.fromIndex);
-    if (index === drag.index) {
-      return;
-    }
-
-    drag.index = index;
-    const others = this.#active.filter(({ element }) => element !== drag.element);
-    this.#activeList.insertBefore(drag.placeholder, others[index]?.element ?? null);
+    this.#drag = { id, session };
   }
 
   #endDrag(): void {
-    const drag = this.#drag;
-    this.#finishDrag();
+    const drag = this.#finishDrag();
 
     // The DOM is back as it was; the store applies the move and the next render reorders the items.
-    if (drag && drag.index !== drag.fromIndex) {
-      this.#onMove(drag.id, drag.index);
+    if (drag && drag.session.index !== drag.session.fromIndex) {
+      this.#onMove(drag.id, drag.session.index);
     }
   }
 
-  /** Removes the placeholder and the drag styles. Safe to call when no drag is in progress. */
-  #finishDrag(): void {
+  /** Ends the visual session of the drag in progress, if any, and returns it. */
+  #finishDrag(): ActiveDrag | undefined {
     const drag = this.#drag;
-    if (!drag) {
-      return;
-    }
-
     this.#drag = undefined;
-    drag.placeholder.remove();
-    drag.element.style.top = '';
-    drag.element.classList.remove('badfennec-todo__item--dragging');
-    this.#root.classList.remove('badfennec-todo--dragging');
+    drag?.session.finish();
+
+    return drag;
   }
 }
 

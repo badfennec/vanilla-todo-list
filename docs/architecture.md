@@ -19,6 +19,7 @@ src/
     view/
       TodoListView.ts         # renders the containers and keeps item views in sync with the store
       TodoItemView.ts         # DOM of a single item, reports user intents through callbacks
+      DragSession.ts          # visual state of one drag: measures, placeholder, drop index
       icons.ts                # default SVG icons
       labels.ts               # default texts and accessible names
     drag/
@@ -44,7 +45,8 @@ in step 6.5.
 | `validation.ts`    | Runtime checks of public input (`parseOptions`, `parseItem`)                              | Hold state                      |
 | `TodoStore`        | Ordered items; `add`, `remove`, `toggle`, `edit`, `move`, `setItems`; emits change events | Touch the DOM                   |
 | `TypedEmitter`     | Listener registry with typed event map                                                    | Know about todos                |
-| `TodoListView`     | Containers, creating/removing/reordering item views from store state, drop placeholder    | Decide order or mutate data     |
+| `TodoListView`     | Containers, creating/removing/reordering item views from store state, wiring drags        | Decide order or mutate data     |
+| `DragSession`      | One drag's measures, placeholder and drop index (created at start, finished at the end)   | Handle pointer input            |
 | `TodoItemView`     | One item's elements, a11y attributes, text input debounce                                 | Know its siblings or its parent |
 | `DragController`   | Pointer Events, pointer capture, visual translate of the dragged element                  | Compute the drop position       |
 | `resolveDropIndex` | Drop math (pure, unit-tested)                                                             | Read the DOM                    |
@@ -94,7 +96,7 @@ type TodoItem = { id: string; text: string; completed: boolean };
 1. `pointerdown` on an item handle (primary pointer and main button only; `canStart()` refuses completed items) makes
    `DragController` capture the pointer. There is one `DragController` per handle; it reports `onStart`,
    `onMove(offsetY)`, `onEnd(offsetY)` and `onCancel` and knows nothing about todos.
-2. At drag start `TodoListView` measures the active items' rects **once**, relative to the active list, so that
+2. At drag start `TodoListView` creates a `DragSession`, which measures the active items' rects **once**, relative to the active list, so that
    page scroll doesn't break them. It inserts a placeholder (same height) in the item's slot and takes the item out of
    the flow (`--dragging`: `position: absolute` in CSS, `top` set from JS).
 3. On `pointermove`, and on `scroll` while dragging, `DragController` translates the element by the pointer offset
@@ -106,7 +108,8 @@ type TodoItem = { id: string; text: string; completed: boolean };
 5. Near the top or bottom edge of the closest scroll container (or the page), `DragController` makes its
    `AutoScroller` scroll every animation frame; the resulting `scroll` events update the drag as in step 3.
 6. Drag state exists only for the duration of one drag and is reset at the end (fixes A2): pointer state in
-   `DragController`, placeholder and measures in `TodoListView`. A `render()` during a drag cancels it.
+   `DragController`, placeholder and measures in a `DragSession` that is dropped at the end. A `render()` during a
+   drag cancels it.
 
 ## Adding an item from the UI
 
