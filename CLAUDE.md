@@ -23,7 +23,8 @@ TypeScript library under `src/` with a redesigned public API.
 | ---------------------- | ------------------------------------------------ |
 | `npm run dev`          | Start the Vite dev server with the demo          |
 | `npm run build`        | Library build: JS, CSS and `.d.ts` into `dist/`  |
-| `npm run preview`      | Preview the production build                     |
+| `npm run build:demo`   | Demo page build into `dist-demo/`                |
+| `npm run preview`      | Preview the demo build                           |
 | `npm run typecheck`    | `tsc --noEmit` (added in step 2.1)               |
 | `npm run lint`         | ESLint (type-aware typescript-eslint)            |
 | `npm run format`       | Prettier, write                                  |

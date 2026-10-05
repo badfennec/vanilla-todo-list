@@ -27,7 +27,8 @@ src/
     styles/
       todo.css                # BEM classes + --bf-* custom properties
   demo/
-    main.ts                   # demo app (imports the font, not the library)
+    main.ts                   # demo app: imports the font, the theme and the library like a consumer
+    demo.css                  # demo page layout and theme overrides
 ```
 
 The legacy code (`badfennec-todo/`, `assets/js/`) stays untouched as a reference and is removed in the last phase.
@@ -148,6 +149,9 @@ The item gap moves from a JS option (`itemsGap`) to the CSS custom property `--b
 | `dist/badfennec-todo.js` (ESM)   | `src/lib/buildEntry.ts` → `index.ts`            | `badfennec-todo`           |
 | `dist/badfennec-todo.css`        | `src/lib/styles/todo.css` (via `buildEntry.ts`) | `badfennec-todo/style.css` |
 | `dist/index.d.ts` (+ per module) | `src/lib/index.ts`                              | `types`                    |
+
+`npm run build:demo` (`vite build --mode demo`) builds the demo page (`index.html` → `src/demo/main.ts`) into
+`dist-demo/`; `npm run preview` serves it.
 
 Consumers import the stylesheet themselves (`import 'badfennec-todo/style.css'` or a `<link>`), or write their own theme.
 

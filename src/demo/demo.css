@@ -1,0 +1,26 @@
+/* Demo page only: the library doesn't force a font or a page layout (C6). */
+
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background-color: #eef0f3;
+}
+
+.demo {
+  max-inline-size: 400px;
+  padding: 64px 16px;
+  margin-inline: auto;
+}
+
+.demo__title {
+  margin: 0 0 24px;
+  font-size: 1.5rem;
+  font-weight: 400;
+  text-align: center;
+}
+
+/* Theming through the library's custom properties. */
+#todo {
+  --bf-font-family: 'Poppins', sans-serif;
+  --bf-radius: 8px;
+}

@@ -18,7 +18,7 @@ Status: `open` until the refactor step that resolves it is done, then `resolved 
 | A7  | add item (`dom.js`, `badfennec-todo.js:160`)         | "+" adds an empty item without focus and without emitting any event. Empty items are never cleaned up. "Add new item" is static text, not an input.                                                                                       | resolved (step 4.4) |
 | A8  | `events.js:11`                                       | `id \|\| ID \|\| key` loses an id of `0`. Duplicate `id` / `ID` fields.                                                                                                                                                                   | resolved (step 3.2) |
 | A9  | layout cache (`todo-item.js`, `drag-intersector.js`) | Sizes and positions are measured once in the constructor (before the Poppins font loads) and never refreshed on resize, scroll or font load. `position: fixed` plus cached rects breaks if the page scrolls during a drag. No autoscroll. | open                |
-| A10 | `index.html:6`                                       | Favicon declared as `image/svg+xml` but the file is a PNG.                                                                                                                                                                                | open                |
+| A10 | `index.html:6`                                       | Favicon declared as `image/svg+xml` but the file is a PNG.                                                                                                                                                                                | resolved (step 6.3) |
 
 ## B. Architecture / OOP
 
@@ -46,7 +46,7 @@ Status: `open` until the refactor step that resolves it is done, then `resolved 
 | C3  | Inline styles set from JS (`flexGrow`, `outline`, `cursor`, `marginBottom` for the gap). They belong in CSS (custom property `--bf-gap`). | open                |
 | C4  | Hardcoded colors, no CSS variables or theming. Dead CSS: `.badfennec-todo__item--intersected`.                                            | resolved (step 4.1) |
 | C5  | `innerHTML` with consumer-provided SVG strings is an XSS surface. Document it, or accept `SVGElement`.                                    | open                |
-| C6  | The library itself imports `@fontsource/poppins`, forcing a font on consumers (and contradicting the "zero dependencies" claim).          | open                |
+| C6  | The library itself imports `@fontsource/poppins`, forcing a font on consumers (and contradicting the "zero dependencies" claim).          | resolved (step 6.3) |
 
 ## D. Project / tooling
 
