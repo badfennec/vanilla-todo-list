@@ -159,6 +159,71 @@ describe('TodoItemView', () => {
     expect(text.textContent).toBe('Buy m');
   });
 
+  it('focuses the text of a new item', () => {
+    const { view, text } = setup({ ...ITEM, text: '' });
+
+    view.editAsNew();
+
+    expect(document.activeElement).toBe(text);
+  });
+
+  it('deletes a new item left empty (A7)', () => {
+    const { view, text, onDelete, onEdit } = setup({ ...ITEM, text: '' });
+
+    view.editAsNew();
+    text.dispatchEvent(new Event('blur'));
+
+    expect(onDelete).toHaveBeenCalledExactlyOnceWith('a');
+    expect(onEdit).not.toHaveBeenCalled();
+  });
+
+  it('deletes a new item whose text was typed and then cleared', () => {
+    const { view, text, onDelete } = setup({ ...ITEM, text: '' });
+
+    view.editAsNew();
+    type(text, 'Buy');
+    vi.runAllTimers();
+    view.update({ ...ITEM, text: 'Buy' });
+    type(text, '');
+    text.dispatchEvent(new Event('blur'));
+
+    expect(onDelete).toHaveBeenCalledExactlyOnceWith('a');
+  });
+
+  it('keeps a new item that was given a text', () => {
+    const { view, text, onDelete, onEdit } = setup({ ...ITEM, text: '' });
+
+    view.editAsNew();
+    type(text, 'Buy bread');
+    text.dispatchEvent(new Event('blur'));
+
+    expect(onEdit).toHaveBeenCalledExactlyOnceWith('a', 'Buy bread');
+    expect(onDelete).not.toHaveBeenCalled();
+  });
+
+  it('keeps an existing item emptied by the user', () => {
+    const { text, onDelete, onEdit } = setup();
+
+    type(text, '');
+    text.dispatchEvent(new Event('blur'));
+
+    expect(onEdit).toHaveBeenCalledExactlyOnceWith('a', '');
+    expect(onDelete).not.toHaveBeenCalled();
+  });
+
+  it('deletes a new item left empty only the first time it is left', () => {
+    const { view, text, onDelete } = setup({ ...ITEM, text: '' });
+
+    view.editAsNew();
+    type(text, 'Buy');
+    text.dispatchEvent(new Event('blur'));
+    view.update({ ...ITEM, text: 'Buy' });
+    type(text, '');
+    text.dispatchEvent(new Event('blur'));
+
+    expect(onDelete).not.toHaveBeenCalled();
+  });
+
   it('drops a pending text change on destroy (A3)', () => {
     const { view, text, onEdit } = setup();
 

@@ -12,7 +12,7 @@ const C: TodoItem = { id: 'c', text: 'C', completed: true };
 function setup() {
   const root = document.createElement('div');
   document.body.append(root);
-  const callbacks = { onToggle: vi.fn(), onEdit: vi.fn(), onDelete: vi.fn() };
+  const callbacks = { onToggle: vi.fn(), onEdit: vi.fn(), onDelete: vi.fn(), onAdd: vi.fn() };
   const view = new TodoListView({ root, icons: DEFAULT_ICONS, labels: DEFAULT_LABELS, ...callbacks });
 
   const list = (modifier: string): HTMLUListElement => {
@@ -28,7 +28,13 @@ function setup() {
     return element;
   };
 
-  return { root, view, list, texts, button, ...callbacks };
+  const addButton = (): HTMLButtonElement => {
+    const element = root.querySelector('.badfennec-todo__add');
+    if (!(element instanceof HTMLButtonElement)) throw new Error('add button not found');
+    return element;
+  };
+
+  return { root, view, list, texts, button, addButton, ...callbacks };
 }
 
 describe('TodoListView', () => {
@@ -36,11 +42,46 @@ describe('TodoListView', () => {
     document.body.replaceChildren();
   });
 
-  it('renders the active and completed lists into the root', () => {
-    const { root, list } = setup();
+  it('renders the active list, the add row and the completed list into the root', () => {
+    const { root, list, addButton } = setup();
 
     expect(root.classList.contains('badfennec-todo')).toBe(true);
-    expect([...root.children]).toEqual([list('active'), list('completed')]);
+    expect([...root.children]).toEqual([list('active'), addButton(), list('completed')]);
+  });
+
+  it('renders the add row as a button with a visible label', () => {
+    const { addButton } = setup();
+
+    expect(addButton().type).toBe('button');
+    expect(addButton().textContent).toBe(DEFAULT_LABELS.addItem);
+    expect(addButton().querySelector('.badfennec-todo__icon svg')).not.toBeNull();
+  });
+
+  it('reports the add intent without adding anything itself', () => {
+    const { view, root, addButton, onAdd } = setup();
+    view.render([]);
+
+    addButton().click();
+
+    expect(onAdd).toHaveBeenCalledOnce();
+    expect(root.querySelectorAll('.badfennec-todo__item')).toHaveLength(0);
+  });
+
+  it('focuses the text of a new item', () => {
+    const { view, root } = setup();
+    view.render([A, B]);
+
+    view.editAsNew('b');
+
+    expect(document.activeElement).toBe(root.querySelectorAll('.badfennec-todo__text').item(1));
+  });
+
+  it('throws when asked to edit an item that is not rendered', () => {
+    const { view } = setup();
+
+    expect(() => {
+      view.editAsNew('missing');
+    }).toThrow(new Error('Todo item "missing" is not rendered'));
   });
 
   it('renders active items in the first list and completed items in the second, in order', () => {
@@ -107,13 +148,16 @@ describe('TodoListView', () => {
   });
 
   it('removes its elements and the root class on destroy, keeping other root content', () => {
-    const { view, root } = setup();
+    const { view, root, addButton, onAdd } = setup();
     const own = document.createElement('p');
     root.prepend(own);
     view.render([A, C]);
 
+    const add = addButton();
     view.destroy();
+    add.click();
 
+    expect(onAdd).not.toHaveBeenCalled();
     expect(root.classList.contains('badfennec-todo')).toBe(false);
     expect([...root.children]).toEqual([own]);
   });

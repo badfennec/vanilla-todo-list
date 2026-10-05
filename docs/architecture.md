@@ -95,6 +95,14 @@ type TodoItem = { id: string; text: string; completed: boolean };
    nothing changes and the item returns to its place.
 5. All drag state lives in `DragController` for the duration of one drag and is reset at the end (fixes A2).
 
+## Adding an item from the UI
+
+1. The "add" row (a `<button>` between the two lists) calls `onAdd()`.
+2. `TodoList` calls `store.add()` (empty text), the store emits `add` + `change`, and the view renders the new item.
+3. `TodoList` calls `listView.editAsNew(id)`: the new item's text gets focus.
+4. If the user leaves the text still empty, the item view reports `onDelete(id)`, so `TodoList` calls `store.remove(id)`
+   and the store emits `remove`. Existing items that the user empties are kept (see ADR-014).
+
 ## Public API (draft)
 
 ```ts
@@ -133,7 +141,8 @@ The item gap moves from a JS option (`itemsGap`) to the CSS custom property `--b
 | `badfennec-todo__button`                            | Shared style of the icon `<button>`s                        |
 | `badfennec-todo__handle`, `__toggle`, `__delete`    | The item's drag handle, completion toggle and delete button |
 | `badfennec-todo__text`                              | The editable item text                                      |
-| `badfennec-todo__add`                               | The add-new-item row                                        |
+| `badfennec-todo__add`                               | The add-new-item row (one `<button>` with a visible label)  |
+| `badfennec-todo__icon`                              | Icon wrapper inside the add row                             |
 
 Default icons live in `view/icons.ts` (`DEFAULT_ICONS`), keyed like `TodoIcons`. Default texts live in
 `view/labels.ts` (`DEFAULT_LABELS`), keyed like `TodoLabels`.

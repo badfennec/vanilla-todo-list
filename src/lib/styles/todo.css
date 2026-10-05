@@ -98,15 +98,25 @@
   border-radius: 2px;
 }
 
+.badfennec-todo__icon {
+  display: flex;
+  flex: none;
+  inline-size: var(--bf-icon-size);
+  block-size: var(--bf-icon-size);
+}
+
 .badfennec-todo__button svg,
-.badfennec-todo__button img {
+.badfennec-todo__button img,
+.badfennec-todo__icon svg,
+.badfennec-todo__icon img {
   display: block;
   inline-size: 100%;
   block-size: 100%;
 }
 
 .badfennec-todo__button:focus-visible,
-.badfennec-todo__text:focus-visible {
+.badfennec-todo__text:focus-visible,
+.badfennec-todo__add:focus-visible {
   outline: 2px solid var(--bf-focus-color);
   outline-offset: 2px;
 }
@@ -137,7 +147,20 @@
   text-decoration: line-through;
 }
 
-/* Add-new-item row: an empty slot where items have the handle, so the add icon lines up with the toggles. */
+/* Add-new-item row: a single <button> with the icon and the visible label. */
+
+.badfennec-todo__add {
+  inline-size: 100%;
+  font: inherit;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  border-radius: var(--bf-radius);
+}
+
+/* An empty slot where items have the handle, so the add icon lines up with the toggles. */
 
 .badfennec-todo__add::before {
   flex: none;

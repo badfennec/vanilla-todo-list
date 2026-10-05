@@ -138,3 +138,17 @@ inherit`); the demo imports Poppins. How the CSS is shipped to consumers is deci
   `destroy()` drops a pending change instead of reporting it. `update()` doesn't rewrite the text while it has focus.
 - **Consequences:** Long texts wrap as before. `plaintext-only` needs a recent browser (Firefox 136+). Consumers get
   one `edit` event per pause in typing, not one per keystroke.
+
+## ADR-014 — "Add" creates an empty item, discarded if left empty
+
+- **Date:** 2026-10-05 · **Status:** accepted
+- **Context:** The legacy "+" adds an empty item with no focus and no event, and empty items pile up (A7). The usual
+  alternative is a text field where the item is created on Enter (TodoMVC). The user prefers to keep the legacy
+  interaction and fix it.
+- **Decision:** The "add" row is a `<button>` with a visible label between the two lists. It creates an empty item
+  through the store and focuses its text (`TodoListView.editAsNew(id)`). If the user leaves that text still empty, the
+  item view reports `onDelete` and the item is removed. Only items just added from the UI are discarded this way: an
+  existing item emptied by the user keeps its empty text, and items added through the API (`todo.add()`) don't get
+  focus.
+- **Consequences:** Consumers see `add` followed by `remove` for an item created and abandoned. The wiring
+  (`onAdd` → `store.add()` → `editAsNew`) lives in the `TodoList` facade (step 6.1).

@@ -22,16 +22,20 @@ export class TodoItemView {
   #item: TodoItem;
   readonly #icons: Readonly<TodoIcons>;
   readonly #onEdit: (id: string, text: string) => void;
+  readonly #onDelete: (id: string) => void;
   readonly #editDelay: number;
   readonly #toggle: HTMLButtonElement;
   readonly #text: HTMLDivElement;
   readonly #listeners = new AbortController();
   #editTimer: ReturnType<typeof setTimeout> | undefined;
+  /** Set by `editAsNew()`: the item is deleted if its text is still empty when the user leaves it. */
+  #discardIfEmpty = false;
 
   constructor({ item, icons, labels, onToggle, onEdit, onDelete, editDelay }: TodoItemViewOptions) {
     this.#item = item;
     this.#icons = icons;
     this.#onEdit = onEdit;
+    this.#onDelete = onDelete;
     this.#editDelay = editDelay ?? DEFAULT_EDIT_DELAY;
 
     this.element = document.createElement('li');
@@ -63,7 +67,7 @@ export class TodoItemView {
     remove.addEventListener(
       'click',
       () => {
-        onDelete(this.#item.id);
+        this.#onDelete(this.#item.id);
       },
       { signal },
     );
@@ -77,7 +81,7 @@ export class TodoItemView {
     this.#text.addEventListener(
       'blur',
       () => {
-        this.#flushEdit();
+        this.#leaveText();
       },
       { signal },
     );
@@ -108,6 +112,15 @@ export class TodoItemView {
     }
   }
 
+  /**
+   * Focuses the text of an item just added from the UI. If the user leaves it with no text, the item is deleted
+   * through `onDelete`, so the UI never leaves empty items behind. Existing items emptied by the user are kept.
+   */
+  editAsNew(): void {
+    this.#discardIfEmpty = true;
+    this.#text.focus();
+  }
+
   /** Removes the element and its listeners. A pending text change is dropped, not reported (fixes A3). */
   destroy(): void {
     clearTimeout(this.#editTimer);
@@ -123,6 +136,16 @@ export class TodoItemView {
     this.#toggle.innerHTML = completed ? this.#icons.checked : this.#icons.unchecked;
   }
 
+  #leaveText(): void {
+    this.#flushEdit();
+
+    const discard = this.#discardIfEmpty && this.#readText() === '';
+    this.#discardIfEmpty = false;
+    if (discard) {
+      this.#onDelete(this.#item.id);
+    }
+  }
+
   #scheduleEdit(): void {
     clearTimeout(this.#editTimer);
     this.#editTimer = setTimeout(() => {
@@ -134,11 +157,15 @@ export class TodoItemView {
     clearTimeout(this.#editTimer);
     this.#editTimer = undefined;
 
-    // Pasted text can still contain line breaks: keep the item on one paragraph.
-    const text = this.#text.textContent.replace(/[\r\n]+/g, ' ');
+    const text = this.#readText();
     if (text !== this.#item.text) {
       this.#onEdit(this.#item.id, text);
     }
+  }
+
+  #readText(): string {
+    // Pasted text can still contain line breaks: keep the item on one paragraph.
+    return this.#text.textContent.replace(/[\r\n]+/g, ' ');
   }
 }
 
